@@ -82,6 +82,29 @@ class SoundFX {
   }
 }
 
+// In-UI Toast Notification System
+function showToast(message) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    document.body.appendChild(container);
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerText = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
 const Game = {
   data: null,
   state: null,
@@ -146,7 +169,7 @@ const Game = {
     if (url) {
       this.audio = new Audio(url);
       this.audio.play().catch(e => {
-        console.log('Audio playback click required');
+        showToast('🔊 Press play again to start verse recitation');
       });
     }
   },
@@ -326,11 +349,10 @@ const Game = {
         : n.status === 'soon' ? '🌙'
         : (n.type === 'question' ? '❓' : '📖');
       const banner = (n.firstInRegion || n.comingSoon)
-        ? '<span class="node-region">' + (n.comingSoon ? '🔒 ' : '') + 'Lesson ' + (n.num || (n.regionIdx+1)) + (n.comingSoon ? ' · soon' : '') + '</span>' : '';
+        ? '<span class="node-region" onclick="Game.clickNode(' + i + ')">' + (n.comingSoon ? '🔒 ' : '') + 'Lesson ' + (n.num || (n.regionIdx+1)) + (n.comingSoon ? ' · soon' : '') + '</span>' : '';
       return '<div class="node ' + n.status + '" style="left:' + p.x + 'px;top:' + p.y + 'px">' +
         banner +
-        '<button class="node-btn"' + (n.enterable ? ' onclick="Game.enterStage(' + i + ')"' : ' disabled') +
-        ' aria-label="' + this.esc(n.title) + '">' + icon + '</button></div>';
+        '<button class="node-btn" onclick="Game.clickNode(' + i + ')" aria-label="' + this.esc(n.title) + '">' + icon + '</button></div>';
     }).join('');
 
     // path fill percentage up to frontier
@@ -340,6 +362,23 @@ const Game = {
       fillEl.style.strokeDasharray = pathLen;
       fillEl.style.strokeDashoffset = pathLen * (1 - pct);
     }
+  },
+
+  clickNode(nodeIdx) {
+    const node = this.nodes[nodeIdx];
+    if (!node) return;
+
+    if (node.status === 'soon' || node.comingSoon) {
+      showToast(`🔒 Lesson ${node.num || (node.regionIdx+1)} is coming soon! Complete Lesson 1 Checkpoint first.`);
+      return;
+    }
+
+    if (node.status === 'locked') {
+      showToast(`🔒 Station ${nodeIdx + 1} is locked. Complete previous stations along the trail first!`);
+      return;
+    }
+
+    this.enterStage(nodeIdx);
   },
 
   smoothPath(pts) {
