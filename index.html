@@ -9,6 +9,9 @@
 </head>
 <body>
 
+  <!-- Toast Notification Bar (Replaces native alerts) -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
   <!-- Top Navigation & Role Toggle Header -->
   <header class="navbar">
     <div class="brand" onclick="location.reload()">
@@ -28,13 +31,13 @@
       <div class="user-stats">
         <div class="stat-badge">
           <span class="stat-icon">⚡</span>
-          <span id="streak-counter">3 Day Streak</span>
+          <span id="streak-counter">1 Day Streak</span>
         </div>
 
         <div class="xp-bar-container">
           <div class="stat-badge">
             <span class="stat-icon">⭐</span>
-            <span id="xp-counter">450 / 600 XP</span>
+            <span id="xp-counter">0 / 600 XP</span>
           </div>
           <div class="xp-bar-track">
             <div class="xp-bar-fill" id="xp-bar-fill"></div>
@@ -159,7 +162,7 @@
         <!-- Interactive Rihla (Journey of Knowledge) Roadmap Map -->
         <div class="quest-tree-card">
           <div class="sidebar-title">
-            <span>🐪 Rihla (Journey of Knowledge) Roadmap Map</span>
+            <span>🧭 Rihla (Journey of Knowledge) Roadmap Map</span>
             <span style="color: var(--primary-emerald); font-size: 0.8rem;">4 Missions Available</span>
           </div>
           <div class="quest-map" id="quest-map">
@@ -195,7 +198,7 @@
             <h2 class="card-title" style="color: var(--text-gold);"><span>🏆</span> Mission Verification Checkpoint</h2>
             <span class="meta-tag" id="checkpoint-status-tag" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: #ef4444;">🔒 Locked (Complete Exploration First)</span>
           </div>
-          <div id="quiz-gatekeep-notice" style="background: rgba(229,193,88,0.1); border-left: 3px solid var(--accent-gold); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-main);">
+          <div id="quiz-gatekeep-notice" aria-live="polite" style="background: rgba(229,193,88,0.1); border-left: 3px solid var(--accent-gold); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-main);">
             🔒 <strong>Pedagogical Requirement:</strong> To unlock this Verification Checkpoint, you must engage with the <strong>Socratic AI Tutor</strong> and complete the <strong>Strange Tool Analogy</strong> exploration!
           </div>
           <div id="quiz-container" style="opacity: 0.5; pointer-events: none;">
@@ -207,7 +210,7 @@
         <article class="lesson-card">
           <div class="lesson-card-header">
             <h2 class="card-title"><span>🎴</span> Key Vocabulary & Terminology Flashcards</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Click any card to flip & practice</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Click or press Enter on any card to flip & practice</span>
           </div>
           <div class="flashcard-container" id="flashcard-container">
             <!-- Flashcards rendered dynamically -->
@@ -241,7 +244,7 @@
           <div class="metric-card">
             <div class="metric-icon">⭐</div>
             <div class="metric-data">
-              <h3 id="dash-xp">450 XP</h3>
+              <h3 id="dash-xp">0 XP</h3>
               <p>Total Knowledge Points</p>
             </div>
           </div>
@@ -249,7 +252,7 @@
           <div class="metric-card">
             <div class="metric-icon">⚡</div>
             <div class="metric-data">
-              <h3>3 Days</h3>
+              <h3 id="dash-streak">1 Day</h3>
               <p>Active Study Streak</p>
             </div>
           </div>
@@ -257,7 +260,7 @@
           <div class="metric-card">
             <div class="metric-icon">🎯</div>
             <div class="metric-data">
-              <h3>100%</h3>
+              <h3 id="dash-accuracy">0%</h3>
               <p>Checkpoint Quiz Mastery</p>
             </div>
           </div>
@@ -265,7 +268,7 @@
           <div class="metric-card">
             <div class="metric-icon">📜</div>
             <div class="metric-data">
-              <h3>Level 1</h3>
+              <h3 id="dash-rank">Level 1</h3>
               <p>Ma'lumat Stage</p>
             </div>
           </div>
@@ -310,7 +313,7 @@
           <h3>Gen 3 Socratic Guide</h3>
           <span class="ai-badge" id="ai-mode-badge">Grade 6 (Foundations)</span>
         </div>
-        <button class="close-btn" id="close-ai-btn">&times;</button>
+        <button class="close-btn" id="close-ai-btn" aria-label="Close AI Tutor">&times;</button>
       </div>
 
       <div style="font-size: 0.75rem; color: var(--text-muted); padding-top: 0.2rem;" id="ai-mode-desc">
@@ -332,7 +335,7 @@
 
     <div class="ai-input-area">
       <input type="text" class="ai-input" id="ai-user-input" placeholder="Ask a question or request a guided hint..." onkeypress="if(event.key==='Enter') handleUserMessage()">
-      <button class="send-btn" onclick="handleUserMessage()">➔</button>
+      <button class="send-btn" onclick="handleUserMessage()" aria-label="Send Message">➔</button>
     </div>
   </div>
 

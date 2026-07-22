@@ -62,7 +62,7 @@
           "title": "4. A Question That Confused Great Thinkers",
           "type": "socratic_inquiry",
           "content": "Throughout history, many philosophers and intellectuals tried to answer the question: 'Why were we created?'\n\nAlthough they were highly intelligent, many of them disagreed with one another and never arrived at a clear answer. The famous philosopher Plato is reported to have said:\n'I neither know nor think that I know.'\n\nThis shows us that intelligence alone is not enough to answer every question. The greatest thinkers were able to study mathematics, science, politics, and many other subjects, yet they remained confused about the purpose of human existence.\nWhy? Because they were searching for the answer in the wrong place.",
-          "explanation": "The confusion comes from relying entirely on human intellect. The intellect is an amazing gift from Allah. It helps us learn, think, compare, analyze, and understand many things. However, the intellect has limits.\n\nA machine cannot explain why it was created. A painting cannot explain why the artist painted it. A tool cannot explain why the manufacturer produced it. Likewise, human beings cannot independently determine the ultimate purpose of their existence because they did not create Governments or themselves. Only the Creator knows the true reason behind the creation.",
+          "explanation": "The confusion comes from relying entirely on human intellect. The intellect is an amazing gift from Allah. It helps us learn, think, compare, analyze, and understand many things. However, the intellect has limits.\n\nA machine cannot explain why it was created. A painting cannot explain why the artist painted it. A tool cannot explain why the manufacturer produced it. Likewise, human beings cannot independently determine the ultimate purpose of their existence because they did not create themselves. Only the Creator knows the true reason behind the creation.",
           "solution": "Therefore, if we want the correct answer, we must refer to Allah. Allah has not left humanity without guidance. He revealed the Qur'an as guidance for mankind, teaching us who we are, where we came from, where we are going, and why we were created. In a sense, the Qur'an functions as the instruction manual for human life."
         },
         {
@@ -71,7 +71,7 @@
           "type": "verses",
           "verses": [
             {
-              "surah": "Perspective of Allah: The Perfect Creator",
+              "surah": "Surah Az-Zumar (39:62)",
               "arabic": "اللَّهُ خَالِقُ كُلِّ شَيْءٍ",
               "translation": "Allah is the Creator of everything.",
               "note": "When we say Allah is the Creator, we affirm one of His perfect attributes. Allah creates because He is the Creator, just as He provides because He is the Provider and shows mercy because He is the Most Merciful. Therefore, from the perspective pertaining to Allah, we exist because Allah created us, and He is the Creator of all things."
@@ -240,21 +240,21 @@
       "name": "Seeker of Truth",
       "icon": "🏅",
       "desc": "Completed Lesson 1 Mission: Why Were We Created?",
-      "unlocked": true
+      "unlocked": false
     },
     {
       "id": "b2",
       "name": "Tawheed Guardian",
       "icon": "📜",
       "desc": "Scored 100% on the Aqidah Verification Checkpoint",
-      "unlocked": true
+      "unlocked": false
     },
     {
       "id": "b3",
       "name": "3-Day Streak",
       "icon": "⚡",
       "desc": "Maintained active study for 3 consecutive days",
-      "unlocked": true
+      "unlocked": false
     },
     {
       "id": "b4",

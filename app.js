@@ -1,11 +1,11 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Audited & Fully Compliant Version
+   Audited & Fully Compliant Version (P0-P3 Upgraded Edition)
    ========================================================================== */
 
 let curriculumData = null;
 let currentLessonIndex = 0;
-let currentXP = 450;
+let currentXP = 0;
 let maxXP = 600;
 let userAnswers = {};
 let currentAiMode = 'foundations';
@@ -49,20 +49,109 @@ class SoundFX {
       console.log('Audio playback prevented or unsupported');
     }
   }
+
+  // Vocal verse recitation playback (Multi-Faculty Engagement: Eyes + Ears + Tongue)
+  static speakVerse(arabicText) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop any active speech
+      const utterance = new SpeechSynthesisUtterance(arabicText);
+      utterance.lang = 'ar-SA';
+      utterance.rate = 0.85; // Recitation pace
+      window.speechSynthesis.speak(utterance);
+    } else {
+      showToast('🔊 Audio recitation is supported in modern web browsers.');
+    }
+  }
+}
+
+// In-UI Toast Notification System (Replaces raw native alert popups)
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerText = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// LocalStorage State Persistence Engine
+function saveProgress() {
+  const state = {
+    currentXP,
+    userAnswers,
+    currentLessonIndex,
+    hasEngagedAI,
+    hasCompletedAnalogy,
+    lastVisitDate: new Date().toISOString().split('T')[0],
+    completedLessons: curriculumData ? curriculumData.lessons.map(l => l.status) : [],
+    unlockedBadges: curriculumData ? curriculumData.badges.map(b => b.unlocked) : []
+  };
+  try {
+    localStorage.setItem('gen3_academy_progress', JSON.stringify(state));
+  } catch (e) {
+    console.log('LocalStorage storage quota or privacy lock');
+  }
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem('gen3_academy_progress');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+
+    if (typeof state.currentXP === 'number') currentXP = state.currentXP;
+    if (state.hasEngagedAI) hasEngagedAI = state.hasEngagedAI;
+    if (state.hasCompletedAnalogy) hasCompletedAnalogy = state.hasCompletedAnalogy;
+
+    if (state.completedLessons && curriculumData) {
+      curriculumData.lessons.forEach((l, idx) => {
+        if (state.completedLessons[idx]) l.status = state.completedLessons[idx];
+      });
+    }
+
+    if (state.unlockedBadges && curriculumData) {
+      curriculumData.badges.forEach((b, idx) => {
+        if (typeof state.unlockedBadges[idx] === 'boolean') b.unlocked = state.unlockedBadges[idx];
+      });
+    }
+
+    updateXPBar();
+  } catch (e) {
+    console.log('Error restoring saved progress');
+  }
 }
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch('data/lessons.json');
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
     curriculumData = await res.json();
+    
+    loadProgress();
     renderQuestMap(curriculumData.lessons);
-    renderLesson(curriculumData.lessons[0]);
+    renderLesson(curriculumData.lessons[currentLessonIndex]);
     renderFlashcards(curriculumData.flashcards);
     renderBadges(curriculumData.badges);
     setupEventListeners();
   } catch (err) {
     console.error('Failed to load curriculum dataset:', err);
+    const bodyContainer = document.getElementById('dynamic-lesson-body');
+    if (bodyContainer) {
+      bodyContainer.innerHTML = `
+        <article class="lesson-card" style="border-color: #ef4444;">
+          <h3 style="color: #ef4444;">⚠️ Curriculum Load Error</h3>
+          <p style="color: var(--text-muted); margin-top: 0.5rem;">Could not fetch curriculum data. Please check your network connection or server endpoint.</p>
+        </article>
+      `;
+    }
   }
 });
 
@@ -101,12 +190,13 @@ function renderQuestMap(lessons) {
 function selectQuestNode(index) {
   const lesson = curriculumData.lessons[index];
   if (lesson.status === 'locked') {
-    alert(`Lesson ${lesson.lessonNumber} is locked. Complete previous missions first!`);
+    showToast(`🔒 Lesson ${lesson.lessonNumber} is locked. Complete previous missions first!`);
     return;
   }
   currentLessonIndex = index;
   renderQuestMap(curriculumData.lessons);
   renderLesson(lesson);
+  saveProgress();
   window.scrollTo({ top: 300, behavior: 'smooth' });
 }
 
@@ -173,7 +263,7 @@ function renderSectionCard(sec) {
               </button>
             `).join('')}
           </div>
-          <div class="feedback-msg" id="analogy-feedback"></div>
+          <div class="feedback-msg" id="analogy-feedback" aria-live="polite"></div>
         </div>
       </article>
     `;
@@ -206,8 +296,13 @@ function renderSectionCard(sec) {
         <div>
           ${sec.verses.map(v => `
             <div class="verse-card">
-              <div class="verse-surah">📜 ${v.surah}</div>
-              <div class="arabic-text">${v.arabic}</div>
+              <div class="verse-header-row">
+                <div class="verse-surah">📜 ${v.surah}</div>
+                <button class="verse-audio-btn" onclick="SoundFX.speakVerse('${v.arabic.replace(/'/g, "\\'")}')">
+                  🔊 Recite Verse
+                </button>
+              </div>
+              <div class="arabic-text" lang="ar" dir="rtl">${v.arabic}</div>
               <div class="verse-translation">"${v.translation}"</div>
               <div class="verse-note">💡 Lesson Insight: ${v.note}</div>
             </div>
@@ -288,6 +383,7 @@ function checkQuizUnlock() {
       statusTag.style.color = 'var(--primary-emerald)';
       statusTag.style.borderColor = 'var(--primary-emerald)';
     }
+    saveProgress();
   }
 }
 
@@ -332,8 +428,15 @@ function submitQuiz() {
   const lesson = curriculumData.lessons[currentLessonIndex];
   if (!lesson || !lesson.quiz) return;
 
-  let correctCount = 0;
   const total = lesson.quiz.length;
+  const answeredKeys = Object.keys(userAnswers);
+
+  if (answeredKeys.length < total) {
+    showToast(`⚠️ Please answer all ${total} questions before submitting.`);
+    return;
+  }
+
+  let correctCount = 0;
 
   lesson.quiz.forEach((q, qIdx) => {
     const selected = userAnswers[qIdx];
@@ -358,10 +461,20 @@ function submitQuiz() {
     if (selected === q.answer) correctCount++;
   });
 
+  const accuracyPct = Math.round((correctCount / total) * 100);
+  document.getElementById('dash-accuracy').innerText = `${accuracyPct}%`;
+
   if (correctCount >= Math.ceil(total / 2)) {
     SoundFX.playChime();
     addXP(100);
     lesson.status = 'completed';
+
+    // Unlock badges upon actual completion
+    if (curriculumData.badges[0]) curriculumData.badges[0].unlocked = true; // Seeker of Truth
+    if (accuracyPct === 100 && curriculumData.badges[1]) curriculumData.badges[1].unlocked = true; // Tawheed Guardian
+    if (curriculumData.badges[2]) curriculumData.badges[2].unlocked = true; // 3-Day Streak
+
+    renderBadges(curriculumData.badges);
 
     if (curriculumData.lessons[currentLessonIndex + 1]) {
       curriculumData.lessons[currentLessonIndex + 1].status = 'unlocked';
@@ -370,8 +483,9 @@ function submitQuiz() {
     renderQuestMap(curriculumData.lessons);
     showRewardModal(correctCount, total);
     updateKnowledgeLevel(2);
+    saveProgress();
   } else {
-    alert(`You scored ${correctCount}/${total}. Review the Socratic guide hints and try again!`);
+    showToast(`You scored ${correctCount}/${total}. Review the Socratic guide hints and try again!`);
   }
 }
 
@@ -379,11 +493,11 @@ function submitQuiz() {
 function renderFlashcards(cards) {
   const container = document.getElementById('flashcard-container');
   container.innerHTML = cards.map(c => `
-    <div class="flashcard" onclick="this.classList.toggle('flipped')">
+    <div class="flashcard" tabindex="0" role="button" aria-label="Flashcard: ${c.term}" onclick="this.classList.toggle('flipped')" onkeypress="if(event.key==='Enter'||event.key===' ') this.classList.toggle('flipped')">
       <div class="flashcard-inner">
         <div class="flashcard-front">
           <div class="flashcard-term">${c.term}</div>
-          <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Click to Reveal Definition 🔄</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Click or Press Enter to Flip 🔄</span>
         </div>
         <div class="flashcard-back">
           <div class="flashcard-def">${c.definition}</div>
@@ -408,9 +522,14 @@ function renderBadges(badges) {
   `).join('');
 }
 
-// XP & Gamification
+// XP & Gamification Functions
 function addXP(amount) {
   currentXP = Math.min(maxXP, currentXP + amount);
+  updateXPBar();
+  saveProgress();
+}
+
+function updateXPBar() {
   document.getElementById('xp-counter').innerText = `${currentXP} / ${maxXP} XP`;
   document.getElementById('dash-xp').innerText = `${currentXP} XP`;
   const fillPct = (currentXP / maxXP) * 100;
@@ -440,13 +559,14 @@ function updateKnowledgeLevel(stepNum) {
 
   if (rankNames[stepNum]) {
     document.getElementById('current-rank').innerText = rankNames[stepNum];
+    document.getElementById('dash-rank').innerText = rankNames[stepNum].split(':')[1].trim();
   }
 }
 
 function showRewardModal(score, total) {
   const modal = document.getElementById('reward-modal');
   document.getElementById('reward-title').innerText = `Checkpoint Passed! (${score}/${total})`;
-  document.getElementById('reward-desc').innerText = `MashaAllah! You unlocked +100 XP, unlocked Lesson 2 on your Rihla Quest Map, and earned Badge: Tawheed Guardian!`;
+  document.getElementById('reward-desc').innerText = `MashaAllah! You earned +100 XP, unlocked Lesson 2 on your Rihla Quest Map, and unlocked Badge: Tawheed Guardian!`;
   modal.classList.add('active');
 }
 
@@ -570,7 +690,7 @@ function updateQuarterTabs(gradeNum) {
   }
 }
 
-// Socratic AI Interaction
+// Socratic AI Interaction with XSS Protection
 function handleUserMessage() {
   const input = document.getElementById('ai-user-input');
   const text = input.value.trim();
@@ -579,8 +699,10 @@ function handleUserMessage() {
   appendChatMessage('user', text);
   input.value = '';
 
-  hasEngagedAI = true;
-  checkQuizUnlock();
+  if (text.length >= 3) {
+    hasEngagedAI = true;
+    checkQuizUnlock();
+  }
 
   setTimeout(() => {
     const aiResponse = generateSocraticResponse(text, currentAiMode);
@@ -594,11 +716,18 @@ function sendSuggestedPrompt(promptText) {
   handleUserMessage();
 }
 
+// XSS Protection: textContent for user input, innerHTML only for trusted AI HTML
 function appendChatMessage(sender, text) {
   const messagesBox = document.getElementById('ai-messages');
   const bubble = document.createElement('div');
   bubble.className = `chat-bubble ${sender}`;
-  bubble.innerHTML = text;
+  
+  if (sender === 'user') {
+    bubble.textContent = text;
+  } else {
+    bubble.innerHTML = text;
+  }
+
   messagesBox.appendChild(bubble);
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
