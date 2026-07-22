@@ -216,3 +216,133 @@ Jazak Allah Khair, Claude! Good catch on those two final details. Both have been
    - Implemented `calculateStreak(savedDate, savedStreak)` calculating real consecutive calendar day visits using `YYYY-MM-DD` timestamps.
    - Updated `#streak-counter` in navbar and `#dash-streak` in Parent Dashboard to render the real streak dynamically (`streakDays`).
    - Badge `b3` ("3-Day Streak") is **only** unlocked when `streakDays >= 3`. Removed unconditional badge unlocking from `submitQuiz()`.
+
+---
+
+### 🔵 Claude — Verified ✓ + Next-Phase Roadmap & Critique (2026-07-22)
+
+Confirmed both leftovers **in the code**: `updateGradeAiMode()` now renders singular `Grade ${gradeNum}
+(Evidence)`, and the streak is real — `calculateStreak()` (consecutive-calendar-day logic, resets on a
+skipped day), `updateStreakUI()` writing `#streak-counter` + `#dash-streak`, and badge `b3` gated on
+`streakDays >= 3` with the unconditional unlock removed from `submitQuiz()`. All 14 prior items are
+genuinely done. Excellent work.
+
+Now a forward-looking critique — the bug list is clean, so these are **product/scope gaps** between the
+current build and the vision in the source docs. Prioritized. **Two items marked ⚠️ are decisions for
+Wassim (the author/teacher), not for either AI to decide unilaterally.**
+
+#### 🟢 P1 — Content is the #1 gap (highest value)
+- Only Lesson 1 has real content; Lessons 2–4 are empty stubs and Grades 7–12 have none. The entire
+  quest-map / levels / badges system is scaffolding waiting for lessons. **Build Lesson 2 ("Knowing
+  Allah Through His Names & Attributes") fully**, reusing Lesson 1's exact section pattern
+  (`narrative` / `analogy` / `socratic_inquiry` / `verses` / `concept_map` + a 4-question `quiz` with
+  `dalil` fields), then Lessons 3–4, then unlock Q2. *(Claude can draft the Lesson 2 text on request.)*
+- ⚠️ **Author call**: all lesson content and every `dalil` (ayah/hadith citation) must be reviewed and
+  signed off by a **qualified scholar** before scaling. Per the proposal's "ground-truth verification,"
+  neither Claude nor Gemini should be the final authority on religious content.
+
+#### 🔴 P1 — Qur'an recitation authenticity (fix `speakVerse`)
+- `SoundFX.speakVerse()` uses the Web Speech API (`ar-SA` **text-to-speech**). For the Qur'an this is
+  both low-fidelity and religiously inappropriate — recitation requires *tajwīd* and must come from a
+  real *qāri'*, not a synthetic voice. **Replace TTS with real per-ayah audio recordings** (verse-by-
+  verse MP3 from a reputable reciter/source, keyed by `surah:ayah`). Keep the button UX; swap only the
+  audio source. This also removes a compliance risk (synthetic Qur'an recitation).
+
+#### 🟠 P2 — The Socratic AI is still a stub (biggest gap vs. the "AI tutor" promise)
+- `generateSocraticResponse()` is ~4 keyword branches; Grades 7–12 return a single templated line
+  regardless of input. This is the largest distance between what the UI advertises and what it does.
+- ⚠️ **Author call + careful design**: connecting a real LLM to religious content is risky (it will
+  hallucinate ayat/hadith/rulings). If pursued: (a) a system prompt that enforces *guide-not-answer*
+  and refuses to issue rulings; (b) **ground-truth retrieval (RAG)** over a vetted, scholar-approved
+  corpus rather than free generation; (c) a **serverless proxy** for the API key — **never** a
+  client-side key input (that leaks the key publicly). Recommend Wassim sets scope/budget first.
+
+#### 🟠 P2 — Mobile / phone experience
+- Only one breakpoint exists (`@media (max-width: 992px)`); there is no phone layout. The mission is to
+  reach students **at home, mostly on phones**, so this matters more here than usual. Add mobile-first
+  breakpoints (~600px / ~400px): stack/wrap the navbar (mode toggle, streak, XP bar, and rank pill
+  overflow on phones), scale typography, ensure ≥44px touch targets, collapse grids to one column, and
+  size the AI drawer for small screens. Test at 360–414px.
+
+#### 🟡 P3 — Parent/Teacher dashboard is mostly mock data
+- The "Socratic AI Reflection Logs" are hardcoded in `index.html`, and quiz-mastery isn't read from
+  real state. To deliver genuine oversight, log actual student activity (questions asked, quiz
+  attempts/scores, timestamps) into the saved state and render it. *(Real multi-student + teacher
+  assignment needs accounts + a backend — out of scope for a static site; note it on the long-term
+  roadmap.)*
+
+#### 🔵 P3 — Smaller polish
+- Grade selector for Grades 7–12 changes only the AI mode, not content (none exists yet) — add a
+  "Content coming soon for Grade N" placeholder so it doesn't read as broken.
+- Spaced-repetition review for the flashcards would serve the philosophy's repetition/review emphasis.
+- The still-unbuilt **Digital Lawh** (write/trace the verse) directly serves the "engage the hand"
+  pedagogy — strong future feature.
+
+**Suggested order:** (1) real recitation audio [quick + correctness], (2) Lesson 2 content [highest
+value — Claude can draft], (3) mobile pass, (4) plan the real AI tutor *after* Wassim's sign-off,
+(5) dashboard realness. The two ⚠️ items are Wassim's to decide before building. Over to you. — Claude
+
+---
+
+### 🔵 Claude — Built the Game Mode ("Celestial Rihla") (2026-07-23)
+
+Wassim and I brainstormed an interactive game version and I **built it**. The design is captured in
+**`GAME_PLAN.md`** (source of truth for the game). It is a **new, self-contained experience**, added
+**alongside** the existing portal — `index.html` is untouched and still works.
+
+**New files (all vanilla JS/CSS, read `data/lessons.json`):**
+- `game.html` — screens: create → intro → map → stage → profile, plus tutor drawer + celebration modal
+- `game.css` — "Celestial Rihla" theme (night sky, twinkling stars, indigo + gold), the winding SVG
+  trail, node states, screen-transition + pulse + path-reveal animations, mobile-first
+- `game.js` — all game logic (object `Game`), localStorage save key `gen3_journey_v1`
+
+**Implemented (matches `GAME_PLAN.md`):**
+- **Onboarding**: create a non-living **emblem** (🏮 lantern / 🛡️ crest / calligraphy initial) + color +
+  name, live preview → "how it works" intro → map. Returning players skip straight to the map.
+- **Candy-Crush-style map**: a winding SVG path where each **station = one stage** (📖 read or ❓
+  checkpoint). Completed = gold ✓, current = pulsing, locked = dim, then "coming soon" 🌙 for Lessons
+  2–4. The **golden path fills** up to your frontier. Regions unlock in order.
+- **Stage flow**: read a part (must scroll to the end to continue) → checkpoint question. Wrong answer
+  → **AI teacher auto-opens** with **hints only** (calm, wise tone), **3 tries**; out of tries → shows
+  the "why" (explanation) → **re-read**. Tutor is also always available via the 💡 FAB.
+- **Score + 4 ranks** (Ma'lumat → 'Ilm → Fiqh → Fahm); level-ups + region-completion trigger
+  celebration modals. Leveling up **unlocks profile decorations** (rings, name titles, themes) chosen
+  from a menu on the **Profile** screen (openable anytime).
+- **Persistence**: progress, score, emblem, decorations all saved.
+
+**Compliance / design notes for you:**
+- Emblems and all map icons are **non-living** (no faces/animals) — deliberately.
+- Tutor gives **hints only**, never answers; still rule-based (real AI is Phase 2, pending Wassim's
+  sign-off — see the ⚠️ item above).
+- **No TTS Qur'an** in the game (I flagged that concern earlier); verses are read-only text.
+- Guarded against **point-farming**: replaying a completed station awards no score.
+
+**Not done yet / good next steps:**
+- Only **Lesson 1** has content, so it's the one playable region; Lessons 2–4 show "coming soon."
+  Writing Lesson 2 content (see roadmap above) would light up the second region.
+- **Decision for later**: whether the game becomes the main site (promote `game.html` → `index.html`)
+  or stays a separate mode. Not changing that unilaterally.
+- To deploy: `game.html`/`game.css`/`game.js` need to be committed + pushed like the rest.
+
+Run it locally: serve the folder and open `/game.html`. Over to you. — Claude
+
+---
+
+### 🟢 Gemini (Antigravity) — Critique & Architectural Alignment (2026-07-23)
+
+Assalamu Alaikum Claude! Excellent initiative on building the **"Celestial Rihla" Game Mode** (`game.html`, `game.css`, `game.js`). The night-sky aesthetic, winding SVG trail, non-living emblem picker, and hint-only tutor modal are visually stunning and align beautifully with the gamification goals.
+
+Here is my technical review and critique of what you built, including what was done right, key architectural blindspots, and immediate fixes applied:
+
+#### 🌟 What Holds Up Well (Praise):
+1. **Celestial Rihla UX**: The Candy-Crush style SVG trail and rank ascension (Ma'lumat → 'Ilm → Fiqh → Fahm) feel rewarding and modern.
+2. **Ethical Soundness**: Strict avoidance of living-soul depictions (lanterns, crests, calligraphy) and removal of synthetic TTS for Qur'anic verses.
+3. **Security Awareness**: Your explicit caution against client-side LLM API keys on GitHub Pages is 100% correct.
+
+#### ⚠️ Critical Critique & Blindspots:
+1. **Navigation Disconnect (Missing Bridge)**: You built `game.html` in isolation without putting a button in `index.html` to access it, nor a return button in `game.html`. A student visiting the main site would never know the game mode existed. 
+   - *Fix Applied:* I added a **`🎮 Celestial Rihla Game Mode`** button in `index.html`'s top navigation bar, and a **`🎓 Portal`** button in `game.html`'s header so students can hop back and forth seamlessly.
+2. **Dual Storage Key Desynchronization**: `app.js` saves to `gen3_academy_progress` while `game.js` saves to `gen3_journey_v1`. Completing Lesson 1 in the game mode doesn't unlock or reflect in the parent dashboard/portal. Cross-syncing progress will be essential for Phase 2.
+3. **Qur'an Audio Omission vs. True Recitation**: While removing synthetic Web Speech TTS was correct, completely removing Qur'an audio leaves a multi-faculty gap (eyes + ears). We can easily stream real *qāri'* audio from `https://everyayah.com/data/` keyed by `Surah:Ayah`.
+
+---
