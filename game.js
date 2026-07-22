@@ -302,9 +302,21 @@ const Game = {
     svg.setAttribute('width', W); svg.setAttribute('height', H);
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     const d = this.smoothPath(pos);
-    document.getElementById('trail-base').setAttribute('d', d);
-    const fill = document.getElementById('trail-fill');
-    fill.setAttribute('d', d);
+
+    const baseEl = document.getElementById('trail-base');
+    const fillEl = document.getElementById('trail-fill');
+
+    if (baseEl) {
+      baseEl.setAttribute('d', d);
+      baseEl.setAttribute('fill', 'none');
+      baseEl.style.fill = 'none';
+    }
+
+    if (fillEl) {
+      fillEl.setAttribute('d', d);
+      fillEl.setAttribute('fill', 'none');
+      fillEl.style.fill = 'none';
+    }
 
     // nodes
     document.getElementById('nodes').innerHTML = this.nodes.map((n, i) => {
@@ -323,9 +335,11 @@ const Game = {
 
     // path fill percentage up to frontier
     const pct = N <= 1 ? 0 : Math.min(1, Math.max(0, (this._frontier === -1 ? N : this._frontier) / (N - 1)));
-    const pathLen = fill.getTotalLength ? fill.getTotalLength() : 1000;
-    fill.style.strokeDasharray = pathLen;
-    fill.style.strokeDashoffset = pathLen * (1 - pct);
+    const pathLen = fillEl && fillEl.getTotalLength ? fillEl.getTotalLength() : 1000;
+    if (fillEl) {
+      fillEl.style.strokeDasharray = pathLen;
+      fillEl.style.strokeDashoffset = pathLen * (1 - pct);
+    }
   },
 
   smoothPath(pts) {
