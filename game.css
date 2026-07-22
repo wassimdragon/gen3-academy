@@ -65,6 +65,20 @@ body.theme-desert::before  { background-color: #170d1a; }
 .screen-enter { animation: fadeIn .35s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* In-UI Toast Notifications */
+.toast-container {
+  position: fixed; top: 1.5rem; right: 1.5rem; z-index: 1000;
+  display: flex; flex-direction: column; gap: 0.6rem; pointer-events: none;
+}
+.toast {
+  background: rgba(14, 16, 42, 0.95); backdrop-filter: blur(12px);
+  border: 1px solid var(--gold); color: var(--text);
+  padding: 0.85rem 1.25rem; border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-size: 0.88rem; font-weight: 500;
+  pointer-events: auto; animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
 /* Buttons */
 .btn {
   font-family: var(--font-head); font-weight: 700; font-size: .95rem;
@@ -141,30 +155,41 @@ body.theme-desert::before  { background-color: #170d1a; }
 .map-sub { color: var(--muted); font-size: .9rem; }
 
 .trail { position: relative; max-width: 460px; margin: 0 auto; }
-.trail-svg { position: absolute; left: 0; top: 0; z-index: 1; overflow: visible; }
-.trail-base { fill: none; stroke: rgba(229,193,88,.18); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1 15; }
-.trail-fill { fill: none; stroke: var(--gold); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(229,193,88,.7)); transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
-.nodes { position: relative; z-index: 2; }
+.trail-svg { position: absolute; left: 0; top: 0; z-index: 1; overflow: visible; pointer-events: none !important; }
+.trail-base { fill: none; stroke: rgba(229,193,88,.18); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1 15; pointer-events: none !important; }
+.trail-fill { fill: none; stroke: var(--gold); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(229,193,88,.7)); transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); pointer-events: none !important; }
+.nodes { position: relative; z-index: 10; pointer-events: none; }
 
-.node { position: absolute; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; }
-.node-region { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: var(--font-head); font-weight: 700; font-size: .72rem; color: var(--gold); background: rgba(229,193,88,.12); border: 1px solid var(--glass-border); padding: .15rem .6rem; border-radius: 999px; }
+.node {
+  position: absolute; transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center;
+  z-index: 20; pointer-events: auto !important; cursor: pointer;
+}
+.node-region {
+  position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-family: var(--font-head); font-weight: 700;
+  font-size: .72rem; color: var(--gold); background: rgba(229,193,88,.15);
+  border: 1px solid var(--glass-border); padding: .2rem .75rem; border-radius: 999px;
+  pointer-events: auto !important; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
 .node-btn {
   width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-size: 1.4rem;
   border: 2px solid var(--glass-border); color: var(--text); cursor: pointer;
   background: radial-gradient(circle at 32% 28%, rgba(52,54,104,.95), rgba(16,17,44,.95));
   transition: transform .15s ease;
+  pointer-events: auto !important;
 }
-.node-btn:hover { transform: scale(1.06); }
+.node-btn:hover { transform: scale(1.08); }
 .node.completed .node-btn { background: radial-gradient(circle at 32% 28%, #1f4037, #0d1f19); border-color: var(--emerald); color: var(--emerald); }
 .node.current .node-btn {
   background: radial-gradient(circle at 32% 28%, #52471b, #1f1b0a); border-color: var(--gold); color: var(--gold);
   box-shadow: 0 0 20px rgba(229,193,88,.6); animation: pulseNode 1.8s infinite;
 }
 @keyframes pulseNode { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-.node.locked { opacity: .45; }
-.node.locked .node-btn { cursor: not-allowed; }
-.node.soon { opacity: .35; }
-.node.soon .node-btn { cursor: not-allowed; border-style: dashed; }
+.node.locked { opacity: .6; }
+.node.soon { opacity: .5; }
+.node.soon .node-btn { border-style: dashed; }
 
 /* ---------- Stage Screen ---------- */
 .stage-card { max-width: 640px; margin: 1rem auto; padding: 1.6rem; }
