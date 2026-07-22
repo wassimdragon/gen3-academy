@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gen 3 Academy — The Journey</title>
   <meta name="description" content="An interactive Islamic Studies learning game: travel the Rihla, earn knowledge, and rise through the ranks.">
-  <link rel="stylesheet" href="game.css?v=1.0.4">
+  <link rel="stylesheet" href="game.css?v=1.0.5">
 </head>
 <body>
 
@@ -14,15 +14,16 @@
 
   <!-- ============ TOP BAR (hidden on create/intro) ============ -->
   <header id="topbar" class="topbar hidden">
-    <button class="tb-identity" onclick="Game.goMap()">
+    <button class="tb-identity" onclick="Game.openProfileModal()" title="Click to view details & change student name">
       <span class="tb-emblem" id="tb-emblem"></span>
       <span class="tb-name" id="tb-name">Seeker</span>
+      <span style="font-size: 0.7rem; opacity: 0.7; margin-left: 0.2rem;">✏️</span>
     </button>
     <div class="tb-stats">
       <a href="index.html" class="pill" style="text-decoration:none; color:var(--accent); border:1px solid var(--accent); background:rgba(255,255,255,0.05); font-size:0.8rem; font-weight:600;">🎓 Portal</a>
       <span class="tb-rank pill" id="tb-rank">📜 Ma'lumat</span>
       <span class="tb-score pill" id="tb-score">⭐ 0</span>
-      <button class="tb-profile" onclick="Game.openProfile()" aria-label="Open profile">🎨</button>
+      <button class="tb-profile" onclick="Game.openProfileModal()" aria-label="Open profile customization">🎨</button>
     </div>
   </header>
 
@@ -124,6 +125,16 @@
         <div class="profile-score" id="prof-score">⭐ 0 Points</div>
       </div>
 
+      <!-- Change Student Name Section -->
+      <div class="deco-section" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 1.1rem; border-radius: 14px;">
+        <h3 style="margin-top:0; color: var(--gold);">✏️ Change Student Name</h3>
+        <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 0.6rem;">Update your name tag for the portal and game leaderboard:</p>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="prof-name-input" class="name-input" maxlength="18" placeholder="Enter student name...">
+          <button class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;" onclick="Game.updateStudentName()">Save ➔</button>
+        </div>
+      </div>
+
       <div class="deco-section">
         <h3>Emblem Ring</h3>
         <div class="deco-opts" id="opt-rings"></div>
@@ -163,6 +174,6 @@
     </div>
   </div>
 
-  <script src="game.js?v=1.0.4"></script>
+  <script src="game.js?v=1.0.5"></script>
 </body>
 </html>

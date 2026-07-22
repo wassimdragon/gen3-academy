@@ -45,7 +45,7 @@ const HINTS = [
   "A wise student eliminates first. Which choices clearly contradict what the lesson taught? Set those aside, and look closer at what remains.",
   "Ask yourself the deeper question: what did the Creator — the Maker — intend here? Let the lesson's main principle steer your heart to the answer.",
 ];
-const TUTOR_GREETING = "As-salamu 'alaykum, dear student. I am here to guide you, not to hand you the answer — for knowledge that is earned is knowledge that is treasured. Read with care, reflect deeply, and understanding will come, in shaa Allah.";
+const TUTOR_GREETING = "As-salamu 'alaykum, dear student. I am here to guide your reflection. Knowledge that is earned is knowledge that endures.";
 
 // Non-Tonal Acoustic UI Sound Generator
 class SoundFX {
@@ -147,7 +147,6 @@ const Game = {
   save() { 
     try { 
       localStorage.setItem(SAVE_KEY, JSON.stringify(this.state)); 
-      // Cross-sync with Portal state
       this.syncPortalState();
     } catch {} 
   },
@@ -289,7 +288,7 @@ const Game = {
         firstInRegion:si===0, title:lesson.title, num:lesson.lessonNumber,
       }));
     });
-    // compute completion / frontier
+
     let frontier = -1;
     nodes.forEach((n, i) => {
       n.completed = !n.comingSoon && (n.stageIdx < (this.state.progress[n.regionId] || 0));
@@ -341,7 +340,6 @@ const Game = {
       fillEl.style.fill = 'none';
     }
 
-    // nodes
     document.getElementById('nodes').innerHTML = this.nodes.map((n, i) => {
       const p = pos[i];
       const icon = n.status === 'completed' ? '✓'
@@ -350,12 +348,11 @@ const Game = {
         : (n.type === 'question' ? '❓' : '📖');
       const banner = (n.firstInRegion || n.comingSoon)
         ? '<span class="node-region" onclick="Game.clickNode(' + i + ')">' + (n.comingSoon ? '🔒 ' : '') + 'Lesson ' + (n.num || (n.regionIdx+1)) + (n.comingSoon ? ' · soon' : '') + '</span>' : '';
-      return '<div class="node ' + n.status + '" style="left:' + p.x + 'px;top:' + p.y + 'px">' +
+      return '<div class="node ' + n.status + '" style="left:' + p.x + 'px;top:' + p.y + 'px; z-index:20;" onclick="Game.clickNode(' + i + ')">' +
         banner +
-        '<button class="node-btn" onclick="Game.clickNode(' + i + ')" aria-label="' + this.esc(n.title) + '">' + icon + '</button></div>';
+        '<button class="node-btn" type="button" onclick="event.stopPropagation(); Game.clickNode(' + i + ')" aria-label="' + this.esc(n.title) + '">' + icon + '</button></div>';
     }).join('');
 
-    // path fill percentage up to frontier
     const pct = N <= 1 ? 0 : Math.min(1, Math.max(0, (this._frontier === -1 ? N : this._frontier) / (N - 1)));
     const pathLen = fillEl && fillEl.getTotalLength ? fillEl.getTotalLength() : 1000;
     if (fillEl) {
@@ -567,14 +564,39 @@ const Game = {
     msgs.appendChild(b); msgs.scrollTop = msgs.scrollHeight;
   },
 
-  /* ---------------- profile ---------------- */
+  /* ---------------- profile & identity customization ---------------- */
+  openProfileModal() {
+    this.openProfile();
+    setTimeout(() => {
+      const nameInput = document.getElementById('prof-name-input');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.select();
+      }
+    }, 100);
+  },
   openProfile() {
     this.returnScreen = document.getElementById('screen-stage').classList.contains('hidden') ? 'map' : 'stage';
-    this.showScreen('profile'); this.renderProfile();
+    this.showScreen('profile');
+    this.renderProfile();
   },
   closeProfile() {
     if (this.returnScreen === 'stage') { this.showScreen('stage'); this.renderStage(); }
     else this.goMap();
+  },
+  updateStudentName() {
+    const input = document.getElementById('prof-name-input');
+    if (!input) return;
+    const newName = input.value.trim().slice(0, 18);
+    if (!newName) {
+      showToast('⚠️ Please enter a valid student name.');
+      return;
+    }
+    this.state.name = newName;
+    this.save();
+    this.renderProfile();
+    this.updateTopbar();
+    showToast(`✨ Student name updated to "${newName}"!`);
   },
   renderProfile() {
     const s = this.state;
@@ -591,6 +613,10 @@ const Game = {
     if (profRank) profRank.textContent = r.icon + ' Level ' + (this.rankIndex()+1) + ': ' + r.name + ' (' + r.label + ')';
     const profScore = document.getElementById('prof-score');
     if (profScore) profScore.textContent = '⭐ ' + s.score + ' points';
+
+    const nameInput = document.getElementById('prof-name-input');
+    if (nameInput) nameInput.value = s.name;
+
     this.renderDecoRow('opt-rings', 'rings', 'ring');
     this.renderDecoRow('opt-tags', 'tags', 'tag');
     this.renderDecoRow('opt-themes', 'themes', 'theme');
