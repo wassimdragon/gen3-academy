@@ -5,6 +5,7 @@
    ========================================================================== */
 
 const SAVE_KEY = 'gen3_journey_v1';
+const UNIFIED_KEY = 'gen3_academy_progress';
 const SCORE_PER_Q = 20;
 const REGION_BONUS = 50;
 const MAX_TRIES = 3;
@@ -60,6 +61,7 @@ const Game = {
   hintIdx: 0,
   returnScreen: 'map',
   celebrateCb: null,
+  audio: null,
 
   async init() {
     try {
@@ -67,7 +69,7 @@ const Game = {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       this.data = await res.json();
     } catch (e) {
-      document.body.innerHTML = '<div style="padding:2rem;color:#fca5a5;font-family:sans-serif">⚠️ Could not load lessons. Please run this on a local server (see project notes), not by opening the file directly.</div>';
+      document.body.innerHTML = '<div style="padding:2rem;color:#fca5a5;font-family:sans-serif">⚠️ Could not load lessons. Please run this on a web server or live host.</div>';
       return;
     }
     this.state = this.load();
@@ -84,7 +86,35 @@ const Game = {
 
   /* ---------------- persistence ---------------- */
   load() { try { return JSON.parse(localStorage.getItem(SAVE_KEY)); } catch { return null; } },
-  save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.state)); } catch {} },
+  save() { 
+    try { 
+      localStorage.setItem(SAVE_KEY, JSON.stringify(this.state)); 
+      // Cross-sync with Portal state
+      this.syncPortalState();
+    } catch {} 
+  },
+
+  syncPortalState() {
+    try {
+      let portalState = JSON.parse(localStorage.getItem(UNIFIED_KEY) || '{}');
+      portalState.currentXP = Math.max(portalState.currentXP || 0, this.state.score);
+      portalState.streakDays = Math.max(portalState.streakDays || 1, 1);
+      localStorage.setItem(UNIFIED_KEY, JSON.stringify(portalState));
+    } catch {}
+  },
+
+  playVerseAudio(url) {
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+    }
+    if (url) {
+      this.audio = new Audio(url);
+      this.audio.play().catch(e => {
+        console.log('Audio playback click required');
+      });
+    }
+  },
 
   /* ---------------- create screen ---------------- */
   setupCreate() {
@@ -148,6 +178,12 @@ const Game = {
     const el = document.getElementById('screen-' + id);
     el.classList.remove('screen-enter'); void el.offsetWidth; el.classList.add('screen-enter');
     window.scrollTo(0, 0);
+  },
+
+  goMap() {
+    this.showScreen('map');
+    this.renderMap();
+    this.updateTopbar();
   },
 
   updateTopbar() {
@@ -242,48 +278,42 @@ const Game = {
         : n.status === 'locked' ? '🔒'
         : n.status === 'soon' ? '🌙'
         : (n.type === 'question' ? '❓' : '📖');
-      const cap = n.comingSoon ? '' : (n.type === 'question' ? 'Checkpoint' : 'Lesson');
       const banner = (n.firstInRegion || n.comingSoon)
         ? '<span class="node-region">' + (n.comingSoon ? '🔒 ' : '') + 'Lesson ' + (n.num || (n.regionIdx+1)) + (n.comingSoon ? ' · soon' : '') + '</span>' : '';
       return '<div class="node ' + n.status + '" style="left:' + p.x + 'px;top:' + p.y + 'px">' +
         banner +
         '<button class="node-btn"' + (n.enterable ? ' onclick="Game.enterStage(' + i + ')"' : ' disabled') +
-          ' aria-label="' + this.esc(n.title) + '">' + icon + '</button>' +
-        (cap ? '<span class="node-cap">' + cap + '</span>' : '') +
-      '</div>';
+        ' aria-label="' + this.esc(n.title) + '">' + icon + '</button></div>';
     }).join('');
 
-    // animate the golden progress path up to the current frontier
-    requestAnimationFrame(() => {
-      const len = fill.getTotalLength ? fill.getTotalLength() : 0;
-      const reveal = N <= 1 ? 1 : (this._frontier < 0 ? 1 : this._frontier / (N - 1));
-      fill.style.strokeDasharray = len;
-      fill.style.strokeDashoffset = len; // start hidden
-      requestAnimationFrame(() => { fill.style.strokeDashoffset = len * (1 - reveal); });
-    });
+    // path fill percentage up to frontier
+    const pct = N <= 1 ? 0 : Math.min(1, Math.max(0, (this._frontier === -1 ? N : this._frontier) / (N - 1)));
+    const pathLen = fill.getTotalLength ? fill.getTotalLength() : 1000;
+    fill.style.strokeDasharray = pathLen;
+    fill.style.strokeDashoffset = pathLen * (1 - pct);
   },
 
   smoothPath(pts) {
     if (!pts.length) return '';
-    let d = 'M ' + pts[0].x + ' ' + pts[0].y;
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i-1], b = pts[i], my = (a.y + b.y) / 2;
-      d += ' C ' + a.x + ' ' + my + ', ' + b.x + ' ' + my + ', ' + b.x + ' ' + b.y;
+    if (pts.length === 1) return 'M' + pts[0].x + ',' + pts[0].y;
+    let d = 'M' + pts[0].x + ',' + pts[0].y;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i], p1 = pts[i + 1];
+      const mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2;
+      d += ' Q' + p0.x + ',' + my + ' ' + mx + ',' + my + ' T' + p1.x + ',' + p1.y;
     }
     return d;
   },
 
-  goMap() { this.showScreen('map'); this.renderMap(); this.updateTopbar(); },
-
-  /* ---------------- stage flow ---------------- */
+  /* ---------------- stage execution ---------------- */
   enterStage(nodeIdx) {
-    const n = this.nodes[nodeIdx];
-    if (!n || n.comingSoon || !n.enterable) return;
+    const node = this.nodes[nodeIdx];
+    if (!node || !node.enterable) return;
     this.currentNodeIdx = nodeIdx;
-    this.currentRegionIdx = n.regionIdx;
-    this.stages = this.buildStages(this.data.lessons[n.regionIdx]);
-    this.currentStageIdx = n.stageIdx;
-    this.currentQ = null;
+    this.currentRegionIdx = node.regionIdx;
+    this.currentStageIdx = node.stageIdx;
+    const lesson = this.data.lessons[node.regionIdx];
+    this.stages = this.buildStages(lesson);
     this.showScreen('stage');
     this.renderStage();
   },
@@ -292,89 +322,86 @@ const Game = {
 
   renderStage() {
     const stage = this.stages[this.currentStageIdx];
-    const total = this.stages.length;
-    document.getElementById('stage-progress').innerHTML =
-      '<span style="width:' + Math.round(100 * (this.currentStageIdx + 1) / total) + '%"></span>';
-    if (!stage) { this.finishNode(); return; }
-    if (stage.type === 'read') this.renderRead(stage);
-    else this.renderQuestion(stage);
-  },
+    const card = document.getElementById('stage-card');
+    const lesson = this.data.lessons[this.currentRegionIdx];
+    const totalS = this.stages.length;
+    const header = '<div class="stage-hdr">' +
+      '<span class="stage-tag">Lesson ' + lesson.lessonNumber + ' · Station ' + (this.currentStageIdx+1) + '/' + totalS + '</span>' +
+      '<button class="stage-close" onclick="Game.goMap()">&times;</button></div>';
 
-  renderRead(stage) {
-    const body = document.getElementById('stage-body');
-    body.innerHTML =
-      '<div class="read-scroll" id="read-scroll">' + stage.sections.map(s => this.renderSection(s)).join('') + '</div>' +
-      '<p class="read-hint" id="read-hint">📖 Read to the end to continue…</p>' +
-      '<button class="btn-primary btn-block" id="read-continue" disabled onclick="Game.finishNode()">Continue ➔</button>';
-    const scroll = document.getElementById('read-scroll');
-    const enable = () => { document.getElementById('read-continue').disabled = false; const h = document.getElementById('read-hint'); if (h) h.textContent = '✓ Ready — continue when you are.'; };
-    if (scroll.scrollHeight <= scroll.clientHeight + 8) enable();
-    else scroll.addEventListener('scroll', function onScroll() {
-      if (scroll.scrollTop + scroll.clientHeight >= scroll.scrollHeight - 24) { enable(); scroll.removeEventListener('scroll', onScroll); }
-    });
-  },
-
-  renderQuestion(stage) {
-    if (this.currentQ !== this.currentStageIdx) { this.tries = MAX_TRIES; this.hintIdx = 0; this.currentQ = this.currentStageIdx; }
-    const q = stage.question;
-    document.getElementById('stage-body').innerHTML =
-      '<div class="question-card">' +
-        '<div class="q-kicker">Checkpoint Question</div>' +
-        '<div class="q-text">' + this.esc(q.question) + '</div>' +
-        '<div class="q-options" id="q-options">' +
-          q.options.map((o, idx) => '<button class="q-opt" onclick="Game.answer(' + idx + ')">' +
-            String.fromCharCode(65 + idx) + '. ' + this.esc(o) + '</button>').join('') +
+    if (stage.type === 'read') {
+      const body = (stage.sections || []).map(s => this.renderSection(s)).join('');
+      card.innerHTML = header + body +
+        '<div class="stage-actions"><button class="btn btn-primary btn-full" onclick="Game.completeStage()">Continue ➔</button></div>';
+    } else if (stage.type === 'question') {
+      this.currentQ = stage.question;
+      this.tries = MAX_TRIES;
+      this.hintIdx = 0;
+      card.innerHTML = header + '<div class="q-box">' +
+        '<div class="q-text">❓ ' + this.esc(this.currentQ.question) + '</div>' +
+        '<div class="q-opts" id="q-opts">' +
+        this.currentQ.options.map((opt, i) =>
+          '<button class="q-opt" onclick="Game.answerQ(' + i + ')"><span>' + String.fromCharCode(65+i) + '.</span> ' + this.esc(opt) + '</button>'
+        ).join('') +
         '</div>' +
-        '<div class="q-tries" id="q-tries">Attempts left: ' + this.tries + '</div>' +
-      '</div>';
+        '<div id="q-feedback" class="q-feedback hidden"></div>' +
+        '</div>';
+    }
   },
 
-  answer(idx) {
-    const q = this.stages[this.currentStageIdx].question;
-    const opts = document.querySelectorAll('#q-options .q-opt');
-    if (!opts.length) return;
-    if (idx === q.answer) {
-      opts.forEach((b, i) => { b.disabled = true; if (i === idx) b.classList.add('correct'); });
-      const award = this.currentStageIdx >= (this.state.progress[this.regionId()] || 0);
-      const rankedUp = award ? this.addScore(SCORE_PER_Q) : false;
-      document.getElementById('q-tries').innerHTML = '<span style="color:var(--emerald)">✓ Correct!' + (award ? ' +' + SCORE_PER_Q + ' points' : '') + '</span>';
-      setTimeout(() => {
-        if (rankedUp) this.celebrateRank(() => this.finishNode());
-        else this.finishNode();
-      }, 900);
+  answerQ(idx) {
+    const q = this.currentQ;
+    const correct = (idx === q.answer);
+    const fb = document.getElementById('q-feedback');
+    fb.classList.remove('hidden', 'correct', 'wrong');
+
+    if (correct) {
+      fb.classList.add('correct');
+      const pts = (this.tries === MAX_TRIES) ? SCORE_PER_Q : Math.max(5, SCORE_PER_Q - (MAX_TRIES - this.tries) * 5);
+      const isReplay = this.currentStageIdx < (this.state.progress[this.regionId()] || 0);
+      let rankUp = false;
+      if (!isReplay) rankUp = this.addScore(pts);
+
+      fb.innerHTML = '<strong>🎉 Correct!</strong>' +
+        (isReplay ? '<p style="margin-top:0.3rem">Completed station (replay awards no new score).</p>' : '<p style="margin-top:0.3rem">+' + pts + ' points earned!</p>') +
+        '<p style="margin-top:0.5rem;font-size:0.85rem"><strong>Dalil:</strong> ' + this.esc(q.dalil || q.explanation) + '</p>' +
+        '<button class="btn btn-primary" style="margin-top:1rem" onclick="Game.onQSuccess(' + rankUp + ')">Continue ➔</button>';
     } else {
-      opts[idx].classList.add('wrong'); opts[idx].disabled = true;
       this.tries--;
+      fb.classList.add('wrong');
       if (this.tries > 0) {
-        document.getElementById('q-tries').textContent = 'Not quite. Attempts left: ' + this.tries;
+        fb.innerHTML = '<strong>💭 Not quite right.</strong><p>You have ' + this.tries + ' tries left. The Socratic Tutor is providing a hint!</p>';
         this.autoHint();
       } else {
-        opts.forEach(b => b.disabled = true);
-        this.showWhy(q);
+        fb.innerHTML = '<strong>📜 Explanation:</strong><p>' + this.esc(q.explanation) + '</p>' +
+          '<p style="margin-top:0.5rem;font-size:0.85rem">Return to the passage, review carefully, and try again.</p>' +
+          '<button class="btn btn-secondary" style="margin-top:1rem" onclick="Game.renderStage()">Re-read Station ➔</button>';
       }
     }
   },
 
-  showWhy(q) {
-    const readStageIdx = this.precedingReadIdx();
-    const globalReadNode = this.currentNodeIdx - (this.currentStageIdx - readStageIdx);
-    const div = document.createElement('div');
-    div.className = 'why-box';
-    div.innerHTML = '<strong>Let us understand why.</strong><br>' + this.esc(q.explanation || '') +
-      '<br><br><button class="btn-primary" onclick="Game.enterStage(' + globalReadNode + ')">Re-read the lesson ➔</button>';
-    document.querySelector('.question-card').appendChild(div);
-  },
-  precedingReadIdx() {
-    for (let i = this.currentStageIdx - 1; i >= 0; i--) if (this.stages[i].type === 'read') return i;
-    return this.currentStageIdx;
+  onQSuccess(rankUp) {
+    if (rankUp) {
+      this.celebrateRank(() => this.completeStage());
+    } else {
+      this.completeStage();
+    }
   },
 
-  finishNode() {
-    const id = this.regionId();
-    const np = this.currentStageIdx + 1;
-    if (np > (this.state.progress[id] || 0)) { this.state.progress[id] = np; this.save(); }
-    if (np >= this.stages.length) this.completeRegion();
-    else this.goMap();
+  completeStage() {
+    const regId = this.regionId();
+    const cur = this.state.progress[regId] || 0;
+    if (this.currentStageIdx >= cur) {
+      this.state.progress[regId] = this.currentStageIdx + 1;
+      this.save();
+    }
+    const totalS = this.stages.length;
+    if (this.currentStageIdx + 1 < totalS) {
+      this.currentStageIdx++;
+      this.renderStage();
+    } else {
+      this.completeRegion();
+    }
   },
 
   completeRegion() {
@@ -415,6 +442,7 @@ const Game = {
       '<div class="verse-card"><div class="verse-surah">📜 ' + this.esc(v.surah) + '</div>' +
       '<div class="arabic" lang="ar" dir="rtl">' + this.esc(v.arabic) + '</div>' +
       '<div class="verse-tr">“' + this.esc(v.translation) + '”</div>' +
+      (v.audioUrl ? '<button class="btn btn-secondary" style="margin-top:0.5rem;font-size:0.8rem;padding:0.3rem 0.6rem;" onclick="Game.playVerseAudio(\'' + v.audioUrl + '\')">🔊 Recite Verse (Qari Alafasy)</button>' : '') +
       (v.note ? '<div class="verse-note">💡 ' + this.esc(v.note) + '</div>' : '') + '</div>').join('') + '</div>';
     if (t === 'concept_map') return '<div class="lesson-card">' + title + (sec.intro ? '<p>' + this.esc(sec.intro) + '</p>' : '') +
       '<div class="concept-grid">' + (sec.categories || []).map(c =>
@@ -425,23 +453,27 @@ const Game = {
 
   /* ---------------- tutor ---------------- */
   openTutor() {
-    document.getElementById('tutor').classList.remove('hidden');
-    const msgs = document.getElementById('tutor-msgs');
-    if (!msgs.children.length) this.pushBubble(TUTOR_GREETING);
-    const onQ = this.stages[this.currentStageIdx] && this.stages[this.currentStageIdx].type === 'question'
-      && !document.getElementById('screen-stage').classList.contains('hidden');
-    document.getElementById('tutor-hint-btn').disabled = !onQ;
+    const drawer = document.getElementById('tutor-drawer');
+    if (drawer) drawer.classList.remove('hidden');
+    const msgs = document.getElementById('tutor-body');
+    if (msgs && !msgs.children.length) this.pushBubble(TUTOR_GREETING);
   },
-  closeTutor() { document.getElementById('tutor').classList.add('hidden'); },
+  closeTutor() { 
+    const drawer = document.getElementById('tutor-drawer');
+    if (drawer) drawer.classList.add('hidden');
+  },
+  openTutorDirect() {
+    this.openTutor();
+  },
   autoHint() {
-    document.getElementById('tutor').classList.remove('hidden');
-    document.getElementById('tutor-hint-btn').disabled = false;
+    this.openTutor();
     this.pushBubble(HINTS[this.hintIdx % HINTS.length]); this.hintIdx++;
   },
   nextHint() { this.pushBubble(HINTS[this.hintIdx % HINTS.length]); this.hintIdx++; },
   pushBubble(text) {
-    const msgs = document.getElementById('tutor-msgs');
-    const b = document.createElement('div'); b.className = 'bubble teacher'; b.textContent = text;
+    const msgs = document.getElementById('tutor-body');
+    if (!msgs) return;
+    const b = document.createElement('div'); b.className = 'tutor-msg tutor-ai'; b.textContent = text;
     msgs.appendChild(b); msgs.scrollTop = msgs.scrollHeight;
   },
 
@@ -456,21 +488,28 @@ const Game = {
   },
   renderProfile() {
     const s = this.state;
-    const emblem = document.getElementById('profile-emblem');
-    emblem.className = 'preview-emblem big ' + this.ringClass(s.deco.ring);
-    emblem.innerHTML = this.emblemGlyph(s);
+    const emblem = document.getElementById('prof-avatar');
+    if (emblem) {
+      emblem.className = 'profile-avatar ' + this.ringClass(s.deco.ring);
+      emblem.innerHTML = this.emblemGlyph(s);
+    }
     const tag = this.tagText(s.deco.tag);
-    document.getElementById('profile-name').innerHTML = this.esc(s.name) + (tag ? ' <span class="name-title">“' + this.esc(tag) + '”</span>' : '');
+    const profName = document.getElementById('prof-name');
+    if (profName) profName.innerHTML = this.esc(s.name) + (tag ? ' <span class="name-title">“' + this.esc(tag) + '”</span>' : '');
     const r = this.rank();
-    document.getElementById('profile-rank').textContent = r.icon + ' Level ' + (this.rankIndex()+1) + ': ' + r.name + ' (' + r.label + ')';
-    document.getElementById('profile-score').textContent = '⭐ ' + s.score + ' points';
-    this.renderDecoRow('deco-rings', 'rings', 'ring');
-    this.renderDecoRow('deco-tags', 'tags', 'tag');
-    this.renderDecoRow('deco-themes', 'themes', 'theme');
+    const profRank = document.getElementById('prof-rank');
+    if (profRank) profRank.textContent = r.icon + ' Level ' + (this.rankIndex()+1) + ': ' + r.name + ' (' + r.label + ')';
+    const profScore = document.getElementById('prof-score');
+    if (profScore) profScore.textContent = '⭐ ' + s.score + ' points';
+    this.renderDecoRow('opt-rings', 'rings', 'ring');
+    this.renderDecoRow('opt-tags', 'tags', 'tag');
+    this.renderDecoRow('opt-themes', 'themes', 'theme');
   },
   renderDecoRow(elId, key, slot) {
     const rankIdx = this.rankIndex(), cur = this.state.deco[slot];
-    document.getElementById(elId).innerHTML = DECOS[key].map(d => {
+    const container = document.getElementById(elId);
+    if (!container) return;
+    container.innerHTML = DECOS[key].map(d => {
       const locked = rankIdx < d.rank, sel = cur === d.id;
       return '<button class="deco-opt ' + (sel ? 'selected ' : '') + (locked ? 'locked' : '') + '"' +
         (locked ? '' : ' onclick="Game.setDeco(\'' + slot + '\',\'' + d.id + '\')"') + '>' +
@@ -485,14 +524,20 @@ const Game = {
 
   /* ---------------- celebration modal ---------------- */
   showCelebrate(icon, title, desc, cb) {
-    document.getElementById('celebrate-ic').textContent = icon;
-    document.getElementById('celebrate-title').textContent = title;
-    document.getElementById('celebrate-desc').textContent = desc;
-    document.getElementById('celebrate').classList.remove('hidden');
+    const iconEl = document.getElementById('celeb-icon');
+    const titleEl = document.getElementById('celeb-title');
+    const descEl = document.getElementById('celeb-sub');
+    const modal = document.getElementById('celeb-modal');
+
+    if (iconEl) iconEl.textContent = icon;
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (modal) modal.classList.remove('hidden');
     this.celebrateCb = cb;
   },
-  closeCelebrate() {
-    document.getElementById('celebrate').classList.add('hidden');
+  closeCeleb() {
+    const modal = document.getElementById('celeb-modal');
+    if (modal) modal.classList.add('hidden');
     const cb = this.celebrateCb; this.celebrateCb = null; if (cb) cb();
   },
 

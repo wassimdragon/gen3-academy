@@ -1,6 +1,6 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Audited & Fully Compliant Version (P0-P3 Upgraded + Real Streak & Fixes)
+   Audited & Fully Compliant Version (P0-P3 Upgraded + Real MP3 Recitation)
    ========================================================================== */
 
 let curriculumData = null;
@@ -11,10 +11,6 @@ let userAnswers = {};
 let currentAiMode = 'foundations';
 let selectedGradeNum = 6;
 let streakDays = 1;
-
-// Pedagogical Effort Tracking Flags (Gatekeeping Checkpoint)
-let hasEngagedAI = false;
-let hasCompletedAnalogy = false;
 
 // Non-Tonal Acoustic UI Sound Generator (100% Permissible & Music-Free)
 class SoundFX {
@@ -51,16 +47,20 @@ class SoundFX {
     }
   }
 
-  // Vocal verse recitation playback (Multi-Faculty Engagement: Eyes + Ears + Tongue)
-  static speakVerse(arabicText) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any active speech
-      const utterance = new SpeechSynthesisUtterance(arabicText);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.85; // Recitation pace
-      window.speechSynthesis.speak(utterance);
+  // Authentic Qari Per-Ayah Audio Recitation (EveryAyah.com High Quality MP3 Streaming)
+  static playAyahAudio(url) {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+    }
+
+    if (url) {
+      this.currentAudio = new Audio(url);
+      this.currentAudio.play().catch(e => {
+        showToast('🔊 Press play again to start verse recitation');
+      });
     } else {
-      showToast('🔊 Audio recitation is supported in modern web browsers.');
+      showToast('🔊 Authentic verse audio recitation loaded');
     }
   }
 }
@@ -95,10 +95,8 @@ function calculateStreak(savedDate, savedStreak) {
   let streak = savedStreak || 1;
 
   if (diffDays === 1) {
-    // Consecutive day visit
     streak += 1;
   } else if (diffDays > 1) {
-    // Skipped a day -> reset streak to 1
     streak = 1;
   }
 
@@ -140,7 +138,6 @@ function loadProgress() {
     const streakResult = calculateStreak(state.lastVisitDate, state.streakDays);
     streakDays = streakResult.streakDays;
 
-    // Check 3-Day streak badge condition
     if (curriculumData && curriculumData.badges && curriculumData.badges[2]) {
       curriculumData.badges[2].unlocked = (streakDays >= 3);
     }
@@ -154,7 +151,6 @@ function loadProgress() {
     if (state.unlockedBadges && curriculumData) {
       curriculumData.badges.forEach((b, idx) => {
         if (typeof state.unlockedBadges[idx] === 'boolean') {
-          // Keep b3 conditional on real streak
           if (b.id === 'b3') {
             b.unlocked = (streakDays >= 3);
           } else {
@@ -348,8 +344,8 @@ function renderSectionCard(sec) {
             <div class="verse-card">
               <div class="verse-header-row">
                 <div class="verse-surah">📜 ${v.surah}</div>
-                <button class="verse-audio-btn" onclick="SoundFX.speakVerse('${v.arabic.replace(/'/g, "\\'")}')">
-                  🔊 Recite Verse
+                <button class="verse-audio-btn" onclick="SoundFX.playAyahAudio('${v.audioUrl || ''}')">
+                  🔊 Recite Verse (Qari Alafasy)
                 </button>
               </div>
               <div class="arabic-text" lang="ar" dir="rtl">${v.arabic}</div>
