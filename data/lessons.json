@@ -7,31 +7,31 @@
       "id": "lesson-1",
       "lessonNumber": 1,
       "title": "Why Were We Created?",
-      "subtitle": "Discovering Human Purpose through Divine Revelation",
+      "subtitle": "Discovering Human Purpose through Divine Revelation & Classical Wisdom",
       "status": "unlocked",
       "objectives": [
         "Explain why the purpose of something is determined by its maker.",
         "Explain why human intellect alone cannot determine the purpose of human existence.",
         "Identify the correct source for answering the question, 'Why were we created?'",
-        "Explain the Islamic answer to the purpose of creation.",
+        "Explain the Islamic answer to the purpose of creation from both Allah's perspective and humanity's perspective.",
         "Support their answer using Qur'anic evidence."
       ],
       "sections": [
         {
           "id": "introduction",
-          "title": "1. The Big Questions",
+          "title": "1. Introduction",
           "type": "narrative",
-          "content": "Every human being, whether young or old, eventually asks some of the most fundamental questions of existence:\n\n• Why am I here?\n• What is the purpose of my existence?\n• Is there a reason behind my creation?\n• What am I supposed to do in this life?\n\nHow a person answers these questions determines how they live their entire life.",
+          "content": "Every human being, whether young or old, eventually asks some very important questions:\n\n• Why am I here?\n• What is the purpose of my existence?\n• Is there a reason behind my creation?\n• What am I supposed to do in this life?\n\nAlthough these questions seem simple, they are among the most important questions a person can ask. In fact, the way a person answers these questions determines how he will live his entire life.\n\nBefore we answer these questions, let us begin with a simple example.",
           "callout": {
             "title": "Core Principle",
-            "text": "The way a person answers their purpose of existence shapes every single decision, priority, and value in their life."
+            "text": "The way a person answers these questions determines how he will live his entire life."
           }
         },
         {
           "id": "strange-tool",
-          "title": "2. The Strange Tool Analogy",
+          "title": "2. A Strange Tool",
           "type": "analogy",
-          "story": "Imagine cleaning out a basement and discovering a strange, unfamiliar tool. You have never seen it before. How would you find out its purpose?",
+          "story": "Imagine that you are cleaning your garage, basement, or attic and you discover a strange tool. You have never seen it before and have no idea what it does. How would you find out its purpose?\n\nYou might search online. You might ask someone knowledgeable. You might look for the instruction manual. Most importantly, you would try to find the company or person who made it because the maker knows better than anyone else why the tool was designed.\n\nNow imagine that someone tells you, 'This tool has no purpose at all. It was made for nothing.' Would that answer satisfy you? Of course not.",
           "options": [
             {
               "text": "Guess randomly based on looks",
@@ -41,68 +41,81 @@
             {
               "text": "Assume it has no purpose at all",
               "correct": false,
-              "feedback": "Intentionally designed objects always serve a purpose!"
+              "feedback": "Everything that is intentionally made has a purpose!"
             },
             {
-              "text": "Ask the creator / read the manufacturer's manual",
+              "text": "Find the company or person who made it",
               "correct": true,
-              "feedback": "Exactly! The maker of the tool knows best why it was designed."
+              "feedback": "Exactly! The maker knows better than anyone else why the tool was designed."
             }
           ],
-          "takeaway": "The value of anything is determined by its purpose. A shoe protects feet; a hammer drives nails; a key unlocks doors. If a simple tool has a purpose, how could a human being—far more complex and precious—exist without one?"
+          "takeaway": "We naturally understand that tools are made for a reason. A hammer is made to drive nails. A key is made to open locks. A phone is made for communication. Everything that is intentionally made has a purpose. In fact, the value of something is closely connected to its purpose. A tool that serves an important purpose is valuable. A tool that serves no purpose is usually considered worthless.\n\nThe value of anything is determined by its purpose."
+        },
+        {
+          "id": "tool-to-yourself",
+          "title": "3. From the Tool to Yourself",
+          "type": "narrative",
+          "content": "Now let us replace the tool with something much more important: yourself.\n\nIf a simple tool has a purpose, is it possible that a human being does not? If a hammer, a phone, or a key was not created without purpose, then how could a human being, who is far more complex and valuable, exist without purpose?\n\nThink about it carefully. Most people can easily explain the purpose of a shoe. They might say it protects the feet, helps us walk comfortably, allows us to run, and protects us from injury. Yet if you ask many people, 'What is the purpose of a human being?' they become confused and give different answers, or sometimes no answer at all.\n\nDoes that mean that a shoe has more purpose than a human being? Of course not. Rather, it means that many people have forgotten where to look for the answer.\n\nJust as the manufacturer of the shoe knows why it was made, the Creator of mankind knows why mankind was created. Therefore, if we truly want to know our purpose, we must ask the One who created us."
         },
         {
           "id": "philosophical-limit",
-          "title": "3. The Limits of Human Intellect",
+          "title": "4. A Question That Confused Great Thinkers",
           "type": "socratic_inquiry",
-          "content": "Throughout history, great thinkers spent lifetimes trying to discover why humans exist. The famous philosopher Plato admitted: 'I neither know nor think that I know.'\n\nWhy did brilliant minds fail to agree?",
-          "explanation": "Human intellect is a powerful gift, but it has boundaries. A painting cannot explain why the artist painted it; a tool cannot explain why it was manufactured. Likewise, human beings cannot independently guess their ultimate purpose because they did not create themselves.",
-          "solution": "The Qur'an acts as the Divine Instruction Manual for human life, sent by Allah—our Creator."
+          "content": "Throughout history, many philosophers and intellectuals tried to answer the question: 'Why were we created?'\n\nAlthough they were highly intelligent, many of them disagreed with one another and never arrived at a clear answer. The famous philosopher Plato is reported to have said:\n'I neither know nor think that I know.'\n\nThis shows us that intelligence alone is not enough to answer every question. The greatest thinkers were able to study mathematics, science, politics, and many other subjects, yet they remained confused about the purpose of human existence.\nWhy? Because they were searching for the answer in the wrong place.",
+          "explanation": "The confusion comes from relying entirely on human intellect. The intellect is an amazing gift from Allah. It helps us learn, think, compare, analyze, and understand many things. However, the intellect has limits.\n\nA machine cannot explain why it was created. A painting cannot explain why the artist painted it. A tool cannot explain why the manufacturer produced it. Likewise, human beings cannot independently determine the ultimate purpose of their existence because they did not create Governments or themselves. Only the Creator knows the true reason behind the creation.",
+          "solution": "Therefore, if we want the correct answer, we must refer to Allah. Allah has not left humanity without guidance. He revealed the Qur'an as guidance for mankind, teaching us who we are, where we came from, where we are going, and why we were created. In a sense, the Qur'an functions as the instruction manual for human life."
         },
         {
-          "id": "quranic-evidence",
-          "title": "4. The Answer from Revelation",
+          "id": "perspective-allah",
+          "title": "5. The Answer from the Perspective of Allah",
           "type": "verses",
           "verses": [
             {
-              "surah": "Surah Fatir (35:28)",
-              "arabic": "إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ",
-              "translation": "Only those fear Allah, from among His servants, who possess knowledge.",
-              "note": "Affirms Allah as the Creator and knowledge as the path to reverence."
-            },
-            {
-              "surah": "Surah Al-Mulk (67:2)",
-              "arabic": "الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا",
-              "translation": "He who created death and life to test you as to which of you is best in deeds.",
-              "note": "Life is an examination ground to show who performs the best deeds."
-            },
-            {
-              "surah": "Surah Adh-Dhariyat (51:56)",
-              "arabic": "وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ",
-              "translation": "And I did not create the jinn and mankind except that they worship Me.",
-              "note": "Direct declaration of the primary purpose of human existence."
+              "surah": "Perspective of Allah: The Perfect Creator",
+              "arabic": "اللَّهُ خَالِقُ كُلِّ شَيْءٍ",
+              "translation": "Allah is the Creator of everything.",
+              "note": "When we say Allah is the Creator, we affirm one of His perfect attributes. Allah creates because He is the Creator, just as He provides because He is the Provider and shows mercy because He is the Most Merciful. Therefore, from the perspective pertaining to Allah, we exist because Allah created us, and He is the Creator of all things."
             }
           ]
         },
         {
-          "id": "worship-scope",
-          "title": "5. What Does Worship ('Ibadah) Really Mean?",
+          "id": "perspective-human",
+          "title": "6. The Answer from the Perspective of Human Beings",
+          "type": "verses",
+          "verses": [
+            {
+              "surah": "Surah Al-Mulk (67:2)",
+              "arabic": "الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا",
+              "translation": "The One who created death and life to test you as to which of you is best in deeds.",
+              "note": "This verse teaches us that life is a test. School has tests. Sports have tryouts. Driving requires examinations. Important positions require evaluation. Likewise, this worldly life is a test. Every day we are being tested through our choices, actions, words, intentions, blessings, hardships, successes, and failures."
+            }
+          ]
+        },
+        {
+          "id": "what-is-the-test-about",
+          "title": "7. What Is the Test About?",
           "type": "concept_map",
-          "intro": "Worship is not limited to ritual prayers or fasting. In Islam, 'Ibadah encompasses every noble action done sincerely for the sake of Allah.",
+          "intro": "Allah further explains the nature of this test. He says in Surah Adh-Dhariyat (51:56): 'And I did not create the jinn and mankind except that they worship Me.'\n\nThis verse provides the direct answer to the question of our purpose. We were created to worship Allah. Many people hear the word worship and immediately think only of prayer or fasting. However, worship in Islam is much broader than that. Worship includes prayer, fasting, charity, dhikr, reading the Qur'an, honoring one's parents, speaking truthfully, helping others, seeking beneficial knowledge, fulfilling responsibilities, and every action done sincerely for the sake of Allah.\n\nA Muslim's entire life can become an act of worship when it is lived according to Allah's guidance. Therefore, the test of life is whether we will choose to worship Allah and obey Him or whether we will follow our desires and neglect the purpose for which we were created.",
           "categories": [
             {
               "name": "Rituals",
-              "examples": ["Salah (Prayer)", "Sawm (Fasting)", "Zakah (Charity)", "Dhikr (Remembrance)"]
+              "examples": ["Salah (Prayer)", "Sawm (Fasting)", "Zakah (Charity)", "Dhikr (Remembrance)", "Reading Qur'an"]
             },
             {
               "name": "Character & Ethics",
-              "examples": ["Honoring Parents", "Truthful Speech", "Patience", "Helping the Needy"]
+              "examples": ["Honoring Parents", "Speaking Truthfully", "Helping Others", "Patience"]
             },
             {
               "name": "Daily Life",
-              "examples": ["Seeking Knowledge", "Fulfilling Trust", "Working Honestly", "Caring for Creation"]
+              "examples": ["Seeking Beneficial Knowledge", "Fulfilling Responsibilities", "Working Honestly", "Every Sincere Deed"]
             }
           ]
+        },
+        {
+          "id": "conclusion",
+          "title": "8. Conclusion",
+          "type": "narrative",
+          "content": "Every created thing has a purpose.\nThe best person to explain the purpose of something is its maker.\nHuman beings are creations of Allah.\nTherefore, the only source that can definitively explain our purpose is Allah Himself.\n\nAllah informed us that:\n• He is the Creator of everything.\n• This life is a test.\n• The purpose of that test is to determine who performs the best deeds.\n• We were created to worship Him.\n\nWhen a person understands this purpose, life begins to make sense. Success is no longer measured merely by wealth, popularity, or worldly achievements. True success is fulfilling the purpose for which Allah created us and preparing for the eternal life that awaits after this temporary world."
         }
       ],
       "quiz": [
@@ -116,6 +129,7 @@
             "It has no purpose until someone invents one"
           ],
           "answer": 1,
+          "dalil": "The Maker Principle: Just as a shoe manufacturer knows why a shoe was made, Allah—the Creator—knows why mankind was created.",
           "explanation": "Just as the manufacturer knows why a tool was made, Allah—the Creator—defines the purpose of human existence."
         },
         {
@@ -125,9 +139,10 @@
             "They were not intelligent enough",
             "They relied solely on human intellect without seeking Divine Revelation",
             "They did not care about the question",
-            "They did not have modern computers"
+            "They did not have modern technology"
           ],
           "answer": 1,
+          "dalil": "Plato's Admission: 'I neither know nor think that I know.' Human intellect has limits and cannot guess its purpose without revelation.",
           "explanation": "Human intellect has limits. A created entity cannot determine its purpose without reference to its Creator."
         },
         {
@@ -140,19 +155,21 @@
             "To live without any responsibility"
           ],
           "answer": 2,
+          "dalil": "Surah Adh-Dhariyat (51:56): 'And I did not create the jinn and mankind except that they worship Me.'",
           "explanation": "Allah states clearly: 'And I did not create the jinn and mankind except that they worship Me.'"
         },
         {
           "id": "q4",
-          "question": "Which of the following describes the complete Islamic understanding of worship ('Ibadah)?",
+          "question": "From the perspective of human beings, what is the nature of this worldly life according to Surah Al-Mulk (67:2)?",
           "options": [
-            "Only praying in the Masjid",
-            "Only fasting during Ramadan",
-            "Every righteous deed done sincerely for Allah (prayers, honesty, helping others, seeking knowledge)",
-            "Only reading books"
+            "It is purely a playground without consequences",
+            "It is a test to determine who performs the best deeds",
+            "It is a punishment",
+            "It is an accident"
           ],
-          "answer": 2,
-          "explanation": "'Ibadah in Islam covers rituals, good manners, honesty, helping others, and seeking knowledge when done for Allah."
+          "answer": 1,
+          "dalil": "Surah Al-Mulk (67:2): 'The One who created death and life to test you as to which of you is best in deeds.'",
+          "explanation": "Life is an examination ground (like school tests or sports tryouts) to evaluate our choices and actions."
         }
       ]
     },
@@ -167,52 +184,8 @@
         "Differentiate between Ruboobiyyah, Uloohiyyah, and Asma wa Sifat.",
         "Explain how knowing Allah as Ar-Rahman and Al-Alim impacts daily character."
       ],
-      "sections": [
-        {
-          "id": "intro-names",
-          "title": "1. Why Do We Study Asma wa Sifat?",
-          "type": "narrative",
-          "content": "You cannot truly love or worship someone you do not know. Studying Allah's Most Beautiful Names (Al-Asma al-Husna) allows a believer to build a deep, intimate, and reverent connection with their Creator.",
-          "callout": {
-            "title": "Prophetic Principle",
-            "text": "The Prophet ﷺ said: 'Allah has ninety-nine names, one hundred minus one. Whoever learns and acts upon them will enter Paradise.' (Sahih Al-Bukhari)"
-          }
-        },
-        {
-          "id": "three-categories",
-          "title": "2. The Three Dimensions of Tawheed",
-          "type": "concept_map",
-          "intro": "Scholars categorized Tawheed into three interconnected dimensions to make it clear and easy to study:",
-          "categories": [
-            {
-              "name": "Tawheed ar-Ruboobiyyah",
-              "examples": ["Oneness in Lordship", "Allah alone creates, owns, and manages the universe."]
-            },
-            {
-              "name": "Tawheed al-Uloohiyyah",
-              "examples": ["Oneness in Worship", "All acts of worship belong to Allah alone without partners."]
-            },
-            {
-              "name": "Tawheed al-Asma wa Sifat",
-              "examples": ["Oneness in Names & Attributes", "Affirming Allah's perfect attributes as described in revelation."]
-            }
-          ]
-        }
-      ],
-      "quiz": [
-        {
-          "id": "l2q1",
-          "question": "Which dimension of Tawheed refers to Allah alone being the Creator and Sustainer of the universe?",
-          "options": [
-            "Tawheed al-Uloohiyyah",
-            "Tawheed ar-Ruboobiyyah",
-            "Tawheed al-Asma wa Sifat",
-            "Tawheed al-Adab"
-          ],
-          "answer": 1,
-          "explanation": "Tawheed ar-Ruboobiyyah refers to Allah's Lordship—creating, maintaining, and controlling everything."
-        }
-      ]
+      "sections": [],
+      "quiz": []
     },
     {
       "id": "lesson-3",
@@ -220,10 +193,7 @@
       "title": "The Natural Disposition (Fitrah) & Iman",
       "subtitle": "How Faith Is Inherent in Human Nature",
       "status": "locked",
-      "objectives": [
-        "Define the concept of Fitrah in Islamic theology.",
-        "Explain how outer influences can veil or nurture the natural disposition."
-      ],
+      "objectives": [],
       "sections": [],
       "quiz": []
     },
@@ -233,9 +203,7 @@
       "title": "Tawheed in Daily Life",
       "subtitle": "Living Sincere Faith in Modern Times",
       "status": "locked",
-      "objectives": [
-        "Apply Tawheed to modern daily challenges and social media pressures."
-      ],
+      "objectives": [],
       "sections": [],
       "quiz": []
     }
@@ -263,7 +231,7 @@
     },
     {
       "term": "Hikmah (حِكْمَة)",
-      "definition": "Wisdom; placing things in their proper place in accordance with divine guidance."
+      "definition": "Wisdom; finding the most beneficial correct answer faithful to revelation."
     }
   ],
   "badges": [

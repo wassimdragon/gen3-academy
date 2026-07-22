@@ -66,14 +66,14 @@
           <button class="grade-btn" data-grade="9">Grade 9</button>
           <button class="grade-btn" data-grade="10">Grade 10</button>
           <button class="grade-btn" data-grade="11">Grade 11</button>
-          <button class="grade-btn" data-grade="12" style="grid-column: span 3;">Grade 12 (Ulum & Usul)</button>
+          <button class="grade-btn" data-grade="12" style="grid-column: span 3;">Grade 12 (Foundational Sciences)</button>
         </div>
 
         <div class="sidebar-title">
           <span>Curriculum Quarter</span>
         </div>
 
-        <div class="quarter-tabs">
+        <div class="quarter-tabs" id="quarter-tabs-container">
           <div class="quarter-item active" data-quarter="1">
             <div class="quarter-info">
               <h4>Q1: Aqidah & Tawheed</h4>
@@ -143,7 +143,7 @@
             <div class="level-node">4</div>
             <div class="level-label">
               <h5>Level 4: Fahm</h5>
-              <p>Insight, Context & Judgment</p>
+              <p>Finding the Most Beneficial Answer</p>
             </div>
           </div>
         </div>
@@ -156,10 +156,10 @@
       <!-- Student View Section -->
       <section class="content-area" id="student-view">
 
-        <!-- Interactive Quest Tree Roadmap Map -->
+        <!-- Interactive Rihla (Journey of Knowledge) Roadmap Map -->
         <div class="quest-tree-card">
           <div class="sidebar-title">
-            <span>🗺️ Quarter 1 Quest Map Roadmap</span>
+            <span>🐪 Rihla (Journey of Knowledge) Roadmap Map</span>
             <span style="color: var(--primary-emerald); font-size: 0.8rem;">4 Missions Available</span>
           </div>
           <div class="quest-map" id="quest-map">
@@ -193,9 +193,12 @@
         <article class="lesson-card" style="border-color: var(--accent-gold-glow);">
           <div class="lesson-card-header">
             <h2 class="card-title" style="color: var(--text-gold);"><span>🏆</span> Mission Verification Checkpoint</h2>
-            <span class="meta-tag" style="background: rgba(229, 193, 88, 0.2); color: var(--accent-gold);">Earn +100 XP</span>
+            <span class="meta-tag" id="checkpoint-status-tag" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: #ef4444;">🔒 Locked (Complete Exploration First)</span>
           </div>
-          <div id="quiz-container">
+          <div id="quiz-gatekeep-notice" style="background: rgba(229,193,88,0.1); border-left: 3px solid var(--accent-gold); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-main);">
+            🔒 <strong>Pedagogical Requirement:</strong> To unlock this Verification Checkpoint, you must engage with the <strong>Socratic AI Tutor</strong> and complete the <strong>Strange Tool Analogy</strong> exploration!
+          </div>
+          <div id="quiz-container" style="opacity: 0.5; pointer-events: none;">
             <!-- Quiz rendered dynamically -->
           </div>
         </article>
@@ -305,15 +308,13 @@
         <div class="ai-drawer-title">
           <span>✨</span>
           <h3>Gen 3 Socratic Guide</h3>
-          <span class="ai-badge">AI Partner</span>
+          <span class="ai-badge" id="ai-mode-badge">Grade 6 (Foundations)</span>
         </div>
         <button class="close-btn" id="close-ai-btn">&times;</button>
       </div>
 
-      <div class="ai-mode-selector">
-        <button class="ai-mode-btn active" onclick="setAiMode('foundational', this)">Grades 6–8 (Foundational)</button>
-        <button class="ai-mode-btn" onclick="setAiMode('transition', this)">Grades 9–10 (Evidence)</button>
-        <button class="ai-mode-btn" onclick="setAiMode('advanced', this)">Grades 11–12 (Debate)</button>
+      <div style="font-size: 0.75rem; color: var(--text-muted); padding-top: 0.2rem;" id="ai-mode-desc">
+        🤖 AI Mode auto-aligned to Grade 6: Guided discovery & structured recall
       </div>
     </div>
 

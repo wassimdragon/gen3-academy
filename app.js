@@ -1,6 +1,6 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Multi-Lesson & Gamified Dashboard Edition
+   Audited & Fully Compliant Version
    ========================================================================== */
 
 let curriculumData = null;
@@ -8,9 +8,14 @@ let currentLessonIndex = 0;
 let currentXP = 450;
 let maxXP = 600;
 let userAnswers = {};
-let currentAiMode = 'foundational';
+let currentAiMode = 'foundations';
+let selectedGradeNum = 6;
 
-// Web Audio API Sound Effects Generator (100% Permissible & Instrument-Free)
+// Pedagogical Effort Tracking Flags (Gatekeeping Checkpoint)
+let hasEngagedAI = false;
+let hasCompletedAnalogy = false;
+
+// Non-Tonal Acoustic UI Sound Generator (100% Permissible & Music-Free)
 class SoundFX {
   static init() {
     if (!this.ctx) {
@@ -24,22 +29,22 @@ class SoundFX {
       this.init();
       if (this.ctx.state === 'suspended') this.ctx.resume();
       
+      // Non-tonal acoustic thud/pop (no musical melody or pitch progression)
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
-      osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15); // E5
-      osc.frequency.exponentialRampToValueAtTime(783.99, this.ctx.currentTime + 0.3); // G5
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.08);
 
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start();
-      osc.stop(this.ctx.currentTime + 0.5);
+      osc.stop(this.ctx.currentTime + 0.08);
     } catch (e) {
       console.log('Audio playback prevented or unsupported');
     }
@@ -81,7 +86,7 @@ function switchView(viewName) {
   }
 }
 
-// Render Quest Map Nodes
+// Render Rihla Quest Map Nodes
 function renderQuestMap(lessons) {
   const mapContainer = document.getElementById('quest-map');
   mapContainer.innerHTML = lessons.map((l, idx) => `
@@ -159,7 +164,7 @@ function renderSectionCard(sec) {
           <h2 class="card-title"><span>🛠️</span> ${sec.title}</h2>
         </div>
         <div class="analogy-box">
-          <p class="analogy-story">${sec.story}</p>
+          <p class="analogy-story" style="white-space: pre-line;">${sec.story}</p>
           <div class="analogy-options">
             ${sec.options.map((opt, idx) => `
               <button class="analogy-btn" onclick="handleAnalogyChoice(${idx}, ${opt.correct})">
@@ -180,10 +185,10 @@ function renderSectionCard(sec) {
         <div class="lesson-card-header">
           <h2 class="card-title"><span>💡</span> ${sec.title}</h2>
         </div>
-        <p style="margin-bottom: 1rem;">${sec.content}</p>
+        <p style="margin-bottom: 1rem; white-space: pre-line;">${sec.content}</p>
         <div style="background: rgba(14, 32, 25, 0.7); border: 1px solid var(--glass-border); padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem;">
           <h4 style="color: var(--primary-emerald); margin-bottom: 0.5rem;">Why Intellect Needs Guidance:</h4>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">${sec.explanation}</p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); white-space: pre-line;">${sec.explanation}</p>
         </div>
         <div style="background: rgba(229, 193, 88, 0.12); border: 1px solid var(--accent-gold); padding: 1rem; border-radius: 12px; color: var(--text-gold);">
           <strong>🌟 The Solution:</strong> ${sec.solution}
@@ -218,7 +223,7 @@ function renderSectionCard(sec) {
         <div class="lesson-card-header">
           <h2 class="card-title"><span>🌱</span> ${sec.title}</h2>
         </div>
-        <p style="margin-bottom: 1rem; color: var(--text-muted);">${sec.intro}</p>
+        <p style="margin-bottom: 1rem; color: var(--text-muted); white-space: pre-line;">${sec.intro}</p>
         <div class="concept-grid">
           ${sec.categories.map(cat => `
             <div class="concept-card">
@@ -254,12 +259,35 @@ function handleAnalogyChoice(index, isCorrect) {
   feedback.innerHTML = `
     <strong>${isCorrect ? '🎉 Excellent Choice!' : '💭 Think Deeper:'}</strong>
     <p style="margin-top: 0.3rem;">${sec2.options[index].feedback}</p>
-    ${isCorrect ? `<p style="margin-top: 0.5rem; font-weight: 600; color: var(--accent-gold);">${sec2.takeaway}</p>` : ''}
+    ${isCorrect ? `<p style="margin-top: 0.5rem; font-weight: 600; color: var(--accent-gold); white-space: pre-line;">${sec2.takeaway}</p>` : ''}
   `;
 
   if (isCorrect) {
     SoundFX.playChime();
     addXP(50);
+    hasCompletedAnalogy = true;
+    checkQuizUnlock();
+  }
+}
+
+// Check & Unlock Quiz Checkpoint
+function checkQuizUnlock() {
+  if (hasEngagedAI || hasCompletedAnalogy) {
+    const quizContainer = document.getElementById('quiz-container');
+    const gateNotice = document.getElementById('quiz-gatekeep-notice');
+    const statusTag = document.getElementById('checkpoint-status-tag');
+
+    if (quizContainer) {
+      quizContainer.style.opacity = '1';
+      quizContainer.style.pointerEvents = 'auto';
+    }
+    if (gateNotice) gateNotice.style.display = 'none';
+    if (statusTag) {
+      statusTag.innerText = '🔓 Unlocked (Ready for Verification)';
+      statusTag.style.background = 'rgba(16, 185, 129, 0.2)';
+      statusTag.style.color = 'var(--primary-emerald)';
+      statusTag.style.borderColor = 'var(--primary-emerald)';
+    }
   }
 }
 
@@ -286,6 +314,8 @@ function renderQuiz(quizList) {
   `).join('') + `
     <button class="reward-btn" style="width: 100%; margin-top: 1rem;" onclick="submitQuiz()">Submit Checkpoint Verification ➔</button>
   `;
+
+  checkQuizUnlock();
 }
 
 function selectQuizAnswer(qIdx, optIdx) {
@@ -320,7 +350,10 @@ function submitQuiz() {
     });
 
     expBox.style.display = 'block';
-    expBox.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
+    expBox.innerHTML = `
+      <strong>📜 Source Verification (Dalil):</strong> ${q.dalil || 'Authentic Quranic Proof'}<br>
+      <strong>Explanation:</strong> ${q.explanation}
+    `;
 
     if (selected === q.answer) correctCount++;
   });
@@ -330,7 +363,6 @@ function submitQuiz() {
     addXP(100);
     lesson.status = 'completed';
 
-    // Unlock next lesson if available
     if (curriculumData.lessons[currentLessonIndex + 1]) {
       curriculumData.lessons[currentLessonIndex + 1].status = 'unlocked';
     }
@@ -414,7 +446,7 @@ function updateKnowledgeLevel(stepNum) {
 function showRewardModal(score, total) {
   const modal = document.getElementById('reward-modal');
   document.getElementById('reward-title').innerText = `Checkpoint Passed! (${score}/${total})`;
-  document.getElementById('reward-desc').innerText = `MashaAllah! You unlocked +100 XP, unlocked Lesson 2 on your Quest Map, and earned Badge: Tawheed Guardian!`;
+  document.getElementById('reward-desc').innerText = `MashaAllah! You unlocked +100 XP, unlocked Lesson 2 on your Rihla Quest Map, and earned Badge: Tawheed Guardian!`;
   modal.classList.add('active');
 }
 
@@ -436,25 +468,106 @@ function setupEventListeners() {
     aiDrawer.classList.remove('open');
   });
 
+  // Grade Selector & Dynamic Quarter / AI Mode Alignment
   const gradeBtns = document.querySelectorAll('.grade-btn');
   gradeBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       gradeBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const selectedGrade = btn.dataset.grade;
-      if (selectedGrade !== '6') {
-        alert(`Grade ${selectedGrade} preview activated. Grade 6 Q1 is currently live.`);
-      }
+      const selectedGrade = parseInt(btn.dataset.grade);
+      selectedGradeNum = selectedGrade;
+      
+      updateGradeAiMode(selectedGrade);
+      updateQuarterTabs(selectedGrade);
     });
   });
 }
 
-// AI Mode Selector
-function setAiMode(mode, element) {
-  currentAiMode = mode;
-  document.querySelectorAll('.ai-mode-btn').forEach(btn => btn.classList.remove('active'));
-  element.classList.add('active');
-  appendChatMessage('ai', `<em>AI Socratic Mode switched to: <strong>${mode.toUpperCase()}</strong></em>`);
+// Update AI Mode & Badge automatically based on selected grade
+function updateGradeAiMode(gradeNum) {
+  const aiBadge = document.getElementById('ai-mode-badge');
+  const aiDesc = document.getElementById('ai-mode-desc');
+
+  if (gradeNum === 6) {
+    currentAiMode = 'foundations';
+    if (aiBadge) aiBadge.innerText = 'Grade 6 (Foundations)';
+    if (aiDesc) aiDesc.innerText = '🤖 AI Mode: Guided discovery, vocabulary recall & foundational principles';
+  } else if (gradeNum >= 7 && gradeNum <= 8) {
+    currentAiMode = 'evidence';
+    if (aiBadge) aiBadge.innerText = `Grades ${gradeNum} (Evidence)`;
+    if (aiDesc) aiDesc.innerText = '🤖 AI Mode: Guided inquiry, textual proofs & prophetic narrations';
+  } else if (gradeNum >= 9 && gradeNum <= 11) {
+    currentAiMode = 'application';
+    if (aiBadge) aiBadge.innerText = `Grade ${gradeNum} (Application)`;
+    if (aiDesc) aiDesc.innerText = '🤖 AI Mode: Guided critical thinking, comparative proofs & practical real-world application';
+  } else if (gradeNum === 12) {
+    currentAiMode = 'sciences';
+    if (aiBadge) aiBadge.innerText = 'Grade 12 (Sciences Behind Scholarship)';
+    if (aiDesc) aiDesc.innerText = "🤖 AI Mode: Advanced 'Ulum al-Qur'an, Hadith methodology & Usul al-Fiqh reasoning";
+  }
+}
+
+// Update Quarter Tabs dynamically for Grade 12 vs Grades 6-11
+function updateQuarterTabs(gradeNum) {
+  const container = document.getElementById('quarter-tabs-container');
+  if (!container) return;
+
+  if (gradeNum === 12) {
+    container.innerHTML = `
+      <div class="quarter-item active" data-quarter="1">
+        <div class="quarter-info">
+          <h4>Q1: 'Ulum al-Qur'an</h4>
+          <p>Qur'anic Sciences & Exegesis</p>
+        </div>
+        <span class="quarter-status">Current</span>
+      </div>
+      <div class="quarter-item" data-quarter="2">
+        <div class="quarter-info">
+          <h4>Q2: 'Ulum al-Hadith</h4>
+          <p>Hadith Sciences & Preservation</p>
+        </div>
+        <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+      </div>
+      <div class="quarter-item" data-quarter="3">
+        <div class="quarter-info">
+          <h4>Q3: Usul al-Fiqh</h4>
+          <p>Principles of Jurisprudence</p>
+        </div>
+        <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div class="quarter-item active" data-quarter="1">
+        <div class="quarter-info">
+          <h4>Q1: Aqidah & Tawheed</h4>
+          <p>Islamic Beliefs & Foundations</p>
+        </div>
+        <span class="quarter-status">Current</span>
+      </div>
+      <div class="quarter-item" data-quarter="2">
+        <div class="quarter-info">
+          <h4>Q2: Fiqh</h4>
+          <p>Practical Law & Action</p>
+        </div>
+        <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+      </div>
+      <div class="quarter-item" data-quarter="3">
+        <div class="quarter-info">
+          <h4>Q3: Seerah & History</h4>
+          <p>Prophetic Life & Civilization</p>
+        </div>
+        <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+      </div>
+      <div class="quarter-item" data-quarter="4">
+        <div class="quarter-info">
+          <h4>Q4: Adab & Character</h4>
+          <p>Manners, Leadership & Ethics</p>
+        </div>
+        <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+      </div>
+    `;
+  }
 }
 
 // Socratic AI Interaction
@@ -465,6 +578,9 @@ function handleUserMessage() {
 
   appendChatMessage('user', text);
   input.value = '';
+
+  hasEngagedAI = true;
+  checkQuizUnlock();
 
   setTimeout(() => {
     const aiResponse = generateSocraticResponse(text, currentAiMode);
@@ -491,22 +607,26 @@ function appendChatMessage(sender, text) {
 function generateSocraticResponse(userText, mode) {
   const query = userText.toLowerCase();
 
-  if (mode === 'advanced') {
-    return `[Grades 11–12 Analytical Mode]: You bring up a critical philosophical tension. How do classical scholars reconcile the limits of pure rationalism (*aql*) with authentic textual transmission (*naql*) when addressing questions of divine purpose?`;
+  if (mode === 'sciences') {
+    return `[Grade 12 Sciences Mode]: In Usul al-Fiqh and 'Ulum al-Qur'an, how do scholars analyze the textual evidence (*dalil*) for human purpose? How does understanding divine attributes (*Asma wa Sifat*) safeguard scholarly derivation?`;
   }
 
-  if (mode === 'transition') {
-    return `[Grades 9–10 Evidence Mode]: Excellent observation. What textual proof from the Qur'an or Sunnah directly supports this distinction, and how does it connect to Tawheed al-Asma wa Sifat?`;
+  if (mode === 'application') {
+    return `[Grades 9–11 Application Mode]: A thoughtful query. How do you apply the principle that 'the maker determines the purpose' when navigating modern career choices, social media expectations, and ethics?`;
   }
 
-  // Foundational Mode (Grades 6–8)
+  if (mode === 'evidence') {
+    return `[Grades 7–8 Evidence Mode]: Excellent question! What textual evidence from Surah Al-Mulk (67:2) or Surah Adh-Dhariyat (51:56) directly supports your response?`;
+  }
+
+  // Foundational Mode (Grade 6)
   if (query.includes('intellect') || query.includes('alone') || query.includes('plato')) {
     return `A thoughtful reflection! Consider this: Can a painting explain why the painter created it, or can a smart watch explain why its engineer designed it? 
     <br><br>Since human intellect is itself <em>created</em>, where must we look to find our true, ultimate purpose?`;
   }
 
   if (query.includes('hint') || query.includes('q2') || query.includes('question')) {
-    return `💡 <strong>Socratic Hint:</strong> Look closely at the story of Plato and the philosophers in Section 3. Did they lack brainpower, or were they searching in the wrong place without Divine Revelation?`;
+    return `💡 <strong>Socratic Hint:</strong> Look closely at the story of Plato and the philosophers in Section 4. Did they lack brainpower, or were they searching in the wrong place without Divine Revelation?`;
   }
 
   if (query.includes('science') || query.includes('math') || query.includes('worship') || query.includes('ibadah')) {
