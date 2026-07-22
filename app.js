@@ -12,6 +12,10 @@ let currentAiMode = 'foundations';
 let selectedGradeNum = 6;
 let streakDays = 1;
 
+// Pedagogical Effort Tracking Flags (Gatekeeping Checkpoint)
+let hasEngagedAI = false;
+let hasCompletedAnalogy = false;
+
 // Non-Tonal Acoustic UI Sound Generator (100% Permissible & Music-Free)
 class SoundFX {
   static init() {
@@ -82,13 +86,25 @@ function showToast(message) {
   }, 3500);
 }
 
-// Real Date-Based Streak Calculation
+// Helper to get local date string YYYY-MM-DD (Prevents UTC timezone streak reset)
+function getLocalDateString(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Real Date-Based Streak Calculation using Local Timezone
 function calculateStreak(savedDate, savedStreak) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   if (!savedDate) return { streakDays: 1, lastVisitDate: today };
 
-  const prevDate = new Date(savedDate);
-  const currDate = new Date(today);
+  const prevParts = savedDate.split('-').map(Number);
+  const currParts = today.split('-').map(Number);
+
+  const prevDate = new Date(prevParts[0], prevParts[1] - 1, prevParts[2]);
+  const currDate = new Date(currParts[0], currParts[1] - 1, currParts[2]);
+
   const diffTime = currDate - prevDate;
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
@@ -105,7 +121,7 @@ function calculateStreak(savedDate, savedStreak) {
 
 // LocalStorage State Persistence Engine
 function saveProgress() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const state = {
     currentXP,
     userAnswers,

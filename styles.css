@@ -131,6 +131,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .brand {
@@ -177,6 +178,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .mode-toggle {
@@ -186,6 +188,7 @@ body {
   padding: 0.3rem;
   display: flex;
   gap: 0.3rem;
+  flex-wrap: wrap;
 }
 
 .mode-btn {
@@ -212,6 +215,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1.25rem;
+  flex-wrap: wrap;
 }
 
 .stat-badge {
@@ -1345,7 +1349,7 @@ body {
   box-shadow: 0 5px 15px rgba(229, 193, 88, 0.4);
 }
 
-/* Responsive Rules */
+/* Responsive Rules & Mobile Formatting */
 @media (max-width: 992px) {
   .app-container {
     grid-template-columns: 1fr;
@@ -1356,5 +1360,35 @@ body {
   }
   .quest-map {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+  .nav-controls {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .user-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .xp-bar-container {
+    flex: 1;
+    min-width: 110px;
+  }
+  .grade-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grade-btn[data-grade="12"] {
+    grid-column: span 2 !important;
+  }
+  .ai-drawer {
+    height: 90vh;
   }
 }

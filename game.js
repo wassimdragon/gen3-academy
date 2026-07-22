@@ -47,6 +47,41 @@ const HINTS = [
 ];
 const TUTOR_GREETING = "As-salamu 'alaykum, dear student. I am here to guide you, not to hand you the answer — for knowledge that is earned is knowledge that is treasured. Read with care, reflect deeply, and understanding will come, in shaa Allah.";
 
+// Non-Tonal Acoustic UI Sound Generator
+class SoundFX {
+  static init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioCtx();
+    }
+  }
+
+  static playChime() {
+    try {
+      this.init();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.08);
+    } catch (e) {
+      console.log('Audio playback prevented or unsupported');
+    }
+  }
+}
+
 const Game = {
   data: null,
   state: null,
@@ -356,6 +391,7 @@ const Game = {
     fb.classList.remove('hidden', 'correct', 'wrong');
 
     if (correct) {
+      SoundFX.playChime();
       fb.classList.add('correct');
       const pts = (this.tries === MAX_TRIES) ? SCORE_PER_Q : Math.max(5, SCORE_PER_Q - (MAX_TRIES - this.tries) * 5);
       const isReplay = this.currentStageIdx < (this.state.progress[this.regionId()] || 0);
@@ -389,6 +425,7 @@ const Game = {
   },
 
   completeStage() {
+    SoundFX.playChime();
     const regId = this.regionId();
     const cur = this.state.progress[regId] || 0;
     if (this.currentStageIdx >= cur) {
