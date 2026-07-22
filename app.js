@@ -1,6 +1,6 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Audited & Fully Compliant Version (P0-P3 Upgraded Edition)
+   Audited & Fully Compliant Version (P0-P3 Upgraded + Real Streak & Fixes)
    ========================================================================== */
 
 let curriculumData = null;
@@ -10,6 +10,7 @@ let maxXP = 600;
 let userAnswers = {};
 let currentAiMode = 'foundations';
 let selectedGradeNum = 6;
+let streakDays = 1;
 
 // Pedagogical Effort Tracking Flags (Gatekeeping Checkpoint)
 let hasEngagedAI = false;
@@ -81,15 +82,40 @@ function showToast(message) {
   }, 3500);
 }
 
+// Real Date-Based Streak Calculation
+function calculateStreak(savedDate, savedStreak) {
+  const today = new Date().toISOString().split('T')[0];
+  if (!savedDate) return { streakDays: 1, lastVisitDate: today };
+
+  const prevDate = new Date(savedDate);
+  const currDate = new Date(today);
+  const diffTime = currDate - prevDate;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  let streak = savedStreak || 1;
+
+  if (diffDays === 1) {
+    // Consecutive day visit
+    streak += 1;
+  } else if (diffDays > 1) {
+    // Skipped a day -> reset streak to 1
+    streak = 1;
+  }
+
+  return { streakDays: streak, lastVisitDate: today };
+}
+
 // LocalStorage State Persistence Engine
 function saveProgress() {
+  const today = new Date().toISOString().split('T')[0];
   const state = {
     currentXP,
     userAnswers,
     currentLessonIndex,
     hasEngagedAI,
     hasCompletedAnalogy,
-    lastVisitDate: new Date().toISOString().split('T')[0],
+    streakDays,
+    lastVisitDate: today,
     completedLessons: curriculumData ? curriculumData.lessons.map(l => l.status) : [],
     unlockedBadges: curriculumData ? curriculumData.badges.map(b => b.unlocked) : []
   };
@@ -110,6 +136,15 @@ function loadProgress() {
     if (state.hasEngagedAI) hasEngagedAI = state.hasEngagedAI;
     if (state.hasCompletedAnalogy) hasCompletedAnalogy = state.hasCompletedAnalogy;
 
+    // Real streak calculation
+    const streakResult = calculateStreak(state.lastVisitDate, state.streakDays);
+    streakDays = streakResult.streakDays;
+
+    // Check 3-Day streak badge condition
+    if (curriculumData && curriculumData.badges && curriculumData.badges[2]) {
+      curriculumData.badges[2].unlocked = (streakDays >= 3);
+    }
+
     if (state.completedLessons && curriculumData) {
       curriculumData.lessons.forEach((l, idx) => {
         if (state.completedLessons[idx]) l.status = state.completedLessons[idx];
@@ -118,14 +153,29 @@ function loadProgress() {
 
     if (state.unlockedBadges && curriculumData) {
       curriculumData.badges.forEach((b, idx) => {
-        if (typeof state.unlockedBadges[idx] === 'boolean') b.unlocked = state.unlockedBadges[idx];
+        if (typeof state.unlockedBadges[idx] === 'boolean') {
+          // Keep b3 conditional on real streak
+          if (b.id === 'b3') {
+            b.unlocked = (streakDays >= 3);
+          } else {
+            b.unlocked = state.unlockedBadges[idx];
+          }
+        }
       });
     }
 
     updateXPBar();
+    updateStreakUI();
   } catch (e) {
     console.log('Error restoring saved progress');
   }
+}
+
+function updateStreakUI() {
+  const counterNav = document.getElementById('streak-counter');
+  const counterDash = document.getElementById('dash-streak');
+  if (counterNav) counterNav.innerText = `${streakDays} Day Streak`;
+  if (counterDash) counterDash.innerText = `${streakDays} Days`;
 }
 
 // Initialize Application
@@ -472,7 +522,11 @@ function submitQuiz() {
     // Unlock badges upon actual completion
     if (curriculumData.badges[0]) curriculumData.badges[0].unlocked = true; // Seeker of Truth
     if (accuracyPct === 100 && curriculumData.badges[1]) curriculumData.badges[1].unlocked = true; // Tawheed Guardian
-    if (curriculumData.badges[2]) curriculumData.badges[2].unlocked = true; // 3-Day Streak
+
+    // Check 3-Day streak badge condition (only unlock if streakDays >= 3)
+    if (streakDays >= 3 && curriculumData.badges[2]) {
+      curriculumData.badges[2].unlocked = true;
+    }
 
     renderBadges(curriculumData.badges);
 
@@ -603,7 +657,7 @@ function setupEventListeners() {
   });
 }
 
-// Update AI Mode & Badge automatically based on selected grade
+// Update AI Mode & Badge automatically based on selected grade (Fixed Pluralization Bug)
 function updateGradeAiMode(gradeNum) {
   const aiBadge = document.getElementById('ai-mode-badge');
   const aiDesc = document.getElementById('ai-mode-desc');
@@ -614,7 +668,7 @@ function updateGradeAiMode(gradeNum) {
     if (aiDesc) aiDesc.innerText = '🤖 AI Mode: Guided discovery, vocabulary recall & foundational principles';
   } else if (gradeNum >= 7 && gradeNum <= 8) {
     currentAiMode = 'evidence';
-    if (aiBadge) aiBadge.innerText = `Grades ${gradeNum} (Evidence)`;
+    if (aiBadge) aiBadge.innerText = `Grade ${gradeNum} (Evidence)`;
     if (aiDesc) aiDesc.innerText = '🤖 AI Mode: Guided inquiry, textual proofs & prophetic narrations';
   } else if (gradeNum >= 9 && gradeNum <= 11) {
     currentAiMode = 'application';
