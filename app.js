@@ -1,6 +1,6 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Audited & Fully Compliant Version (Rich Socratic AI Engine + Google OAuth)
+   Audited & Fully Compliant Version (Google Gemini Live API + OAuth)
    ========================================================================== */
 
 let curriculumData = null;
@@ -90,6 +90,67 @@ function renderUserAuthUI() {
       </button>
     `;
   }
+}
+
+// Gemini API Configuration
+function promptGeminiApiKey() {
+  const existingKey = localStorage.getItem('gemini_api_key') || '';
+  const inputKey = prompt("Enter your Google Gemini API Key (from aistudio.google.com):", existingKey);
+  if (inputKey !== null) {
+    const trimmed = inputKey.trim();
+    if (trimmed) {
+      localStorage.setItem('gemini_api_key', trimmed);
+      showToast("✨ Live Google Gemini API Key configured!");
+    } else {
+      localStorage.removeItem('gemini_api_key');
+      showToast("Switched to built-in Socratic AI engine.");
+    }
+  }
+}
+
+// Live Google Gemini 1.5 Flash API Connector
+async function callGeminiLiveAPI(userText, mode) {
+  const apiKey = localStorage.getItem('gemini_api_key');
+  if (!apiKey) return null;
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+  const systemInstruction = `You are the Generation 3 Academy Socratic AI Learning Partner for Grade ${selectedGradeNum} (${mode} mode).
+Your duty is guided inquiry and pedagogical reflection grounded in authentic Islamic Studies curriculum.
+NEVER give direct answers to quiz questions. Guide the student with questions and hints based on the lesson text.
+Never fabricate Quranic verses or Hadiths. Always respond in warm, encouraging Github Markdown with high-quality formatting.`;
+
+  const lessonContext = curriculumData ? JSON.stringify(curriculumData.lessons[currentLessonIndex] || {}) : "";
+
+  const payload = {
+    system_instruction: {
+      parts: [{ text: systemInstruction }]
+    },
+    contents: [
+      {
+        parts: [
+          { text: `Curriculum Context: ${lessonContext}\nStudent Prompt: ${userText}` }
+        ]
+      }
+    ]
+  };
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0].text) {
+      return `<strong>[Live Gemini 1.5 Flash]:</strong> ${data.candidates[0].content.parts[0].text.replace(/\n/g, '<br>')}`;
+    }
+  } catch (e) {
+    console.log('Gemini Live API fallback to built-in Socratic RAG engine');
+  }
+
+  return null;
 }
 
 // Non-Tonal Acoustic UI Sound Generator (100% Permissible & Music-Free)
@@ -811,7 +872,7 @@ function updateQuarterTabs(gradeNum) {
   }
 }
 
-function handleUserMessage() {
+async function handleUserMessage() {
   const input = document.getElementById('ai-user-input');
   const text = input.value.trim();
   if (!text) return;
@@ -824,6 +885,15 @@ function handleUserMessage() {
     checkQuizUnlock();
   }
 
+  // 1. Check if Live Gemini API key is present
+  const liveResponse = await callGeminiLiveAPI(text, currentAiMode);
+  if (liveResponse) {
+    appendChatMessage('ai', liveResponse);
+    SoundFX.playChime();
+    return;
+  }
+
+  // 2. Fallback to built-in Socratic RAG Engine
   setTimeout(() => {
     const aiResponse = generateSocraticResponse(text, currentAiMode);
     appendChatMessage('ai', aiResponse);
@@ -855,21 +925,18 @@ function appendChatMessage(sender, text) {
 function generateSocraticResponse(userText, mode) {
   const q = userText.toLowerCase();
 
-  // Mode Prefix for Clear Socratic Context
   let prefix = "";
   if (mode === 'evidence') prefix = "<strong>[Grade 7–8 Evidence Mode]:</strong> ";
   else if (mode === 'application') prefix = "<strong>[Grades 9–11 Application Mode]:</strong> ";
   else if (mode === 'sciences') prefix = "<strong>[Grade 12 Foundational Sciences Mode]:</strong> ";
   else prefix = "<strong>[Grade 6 Socratic Teacher]:</strong> ";
 
-  // 1. Intellect vs Revelation & Purpose
   if (q.includes('intellect') || q.includes('alone') || q.includes('plato') || q.includes('brain') || q.includes('think')) {
     return `${prefix}A brilliant observation! Consider this analogy: Can a smartphone explain why its software engineer created it, or can a painting explain why the artist painted it?
     <br><br>Since human intellect is itself <em>created</em>, it cannot define its own purpose. Where must we look to discover why the Maker created us?
     <br><br>💡 <em>Reflection:</em> What does Surah Az-Zumar (39:62) state about Allah being the Creator of all things?`;
   }
 
-  // 2. Hint / Quiz Question Help
   if (q.includes('hint') || q.includes('q2') || q.includes('q1') || q.includes('q3') || q.includes('q4') || q.includes('question') || q.includes('help')) {
     return `${prefix}💡 <strong>Socratic Hint:</strong> Look at the 4 core principles in Lesson 1:
     <br>1. The purpose of a tool is determined by its <strong>Maker</strong>, not the tool itself.
@@ -878,13 +945,11 @@ function generateSocraticResponse(userText, mode) {
     <br><br>Which option aligns with the rule that the Creator defines the purpose?`;
   }
 
-  // 3. Science, Homework & Intentions ('Ibadah Scope)
   if (q.includes('science') || q.includes('math') || q.includes('school') || q.includes('worship') || q.includes('ibadah')) {
     return `${prefix}SubhanAllah! In Islam, <strong>'Ibadah (رُبُوبِيَّة)</strong> is a comprehensive term for every word, action, and study loved by Allah.
     <br><br>If a student studies biology to marvel at Allah's living creation or mathematics to serve humanity, how does that intention transform daily homework into worship? What intention will you make today?`;
   }
 
-  // 4. Evidence & Quranic Verses
   if (q.includes('proof') || q.includes('verse') || q.includes('quran') || q.includes('dalil') || q.includes('evidence')) {
     return `${prefix}Excellent inquiry! In Aqidah, every truth is anchored in authentic <em>dalīl</em> (textual proof).
     <br><br>• <strong>Surah Adh-Dhariyat (51:56):</strong> <em>"And I did not create the jinn and mankind except to worship Me."</em>
@@ -892,13 +957,11 @@ function generateSocraticResponse(userText, mode) {
     <br><br>How do these two verses together define both our ultimate goal and our daily life test?`;
   }
 
-  // 5. Why Were We Created? / Purpose of Creation
   if (q.includes('why') || q.includes('purpose') || q.includes('created') || q.includes('meaning')) {
     return `${prefix}That gets to the very heart of human existence! From Allah's perspective, He created us out of His Divine Wisdom (*Hikmah*). From humanity's perspective, we were created to know, love, and worship Him alone.
     <br><br>How does knowing your purpose change how you spend your time, energy, and choices each day?`;
   }
 
-  // General Socratic Response for any query
   return `${prefix}Assalamu Alaikum! That is a deep and thoughtful query: <em>"${userText}"</em>.
   <br><br>In classical Islamic seeking of knowledge (*Ṭālib al-ʿIlm*), true wisdom comes from reflecting on revelation.
   <br><br>Based on what we studied about the <strong>Maker of the Tool</strong> and <strong>Qur'anic Revelation as the Instruction Manual</strong>, how would you begin breaking that down?`;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generation 3 Academy - AI Gamified Islamic Studies</title>
   <meta name="description" content="AI-assisted gamified Islamic Studies platform preparing the third generation of Muslim students in the West through classical scholarship and modern technology.">
-  <link rel="stylesheet" href="styles.css?v=1.0.3">
+  <link rel="stylesheet" href="styles.css?v=1.0.4">
 </head>
 <body>
 
@@ -309,7 +309,8 @@
           <span>✨</span>
           <h3>Gen 3 Socratic Partner</h3>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <button onclick="promptGeminiApiKey()" class="chip-btn" style="border-color: var(--accent-gold); color: var(--accent-gold); padding: 0.2rem 0.5rem;" title="Configure Live Google Gemini API Key">⚙️ Gemini API</button>
           <span class="ai-badge" id="ai-mode-badge">Grade 6 (Foundations)</span>
           <button class="close-btn" id="close-ai-btn" aria-label="Close AI Drawer">&times;</button>
         </div>
@@ -351,6 +352,6 @@
   <!-- Firebase Auth Web SDK (Compat mode for static site) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.3"></script>
+  <script src="app.js?v=1.0.4"></script>
 </body>
 </html>
