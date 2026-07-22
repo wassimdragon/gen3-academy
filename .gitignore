@@ -1,0 +1,15 @@
+# Sensitive source files (DO NOT COMMIT)
+*.docx
+*.doc
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary & Python cached files
+__pycache__/
+*.pyc
+
+# Local server logs
+*.log

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generation 3 Academy - AI Gamified Islamic Studies</title>
+  <meta name="description" content="AI-assisted gamified Islamic Studies platform preparing the third generation of Muslim students in the West through classical scholarship and modern technology.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation & Role Toggle Header -->
+  <header class="navbar">
+    <div class="brand" onclick="location.reload()">
+      <div class="brand-icon">G3</div>
+      <div class="brand-text">
+        <h1>GEN 3 ACADEMY</h1>
+        <p>AI-Gamified Islamic Studies</p>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-student-mode" onclick="switchView('student')">🎓 Student Portal</button>
+        <button class="mode-btn" id="btn-dashboard-mode" onclick="switchView('dashboard')">📊 Parent/Teacher Dashboard</button>
+      </div>
+
+      <div class="user-stats">
+        <div class="stat-badge">
+          <span class="stat-icon">⚡</span>
+          <span id="streak-counter">3 Day Streak</span>
+        </div>
+
+        <div class="xp-bar-container">
+          <div class="stat-badge">
+            <span class="stat-icon">⭐</span>
+            <span id="xp-counter">450 / 600 XP</span>
+          </div>
+          <div class="xp-bar-track">
+            <div class="xp-bar-fill" id="xp-bar-fill"></div>
+          </div>
+        </div>
+
+        <div class="rank-pill" id="current-rank">
+          <span>📜 Level 1: Ma'lumat</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-container">
+
+    <!-- Sidebar: Grade & Quest Map Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <span>Grade Level</span>
+          <span style="color: var(--accent-gold); font-size: 0.8rem;">Grades 6–12</span>
+        </div>
+        
+        <div class="grade-selector" id="grade-selector">
+          <button class="grade-btn active" data-grade="6">Grade 6</button>
+          <button class="grade-btn" data-grade="7">Grade 7</button>
+          <button class="grade-btn" data-grade="8">Grade 8</button>
+          <button class="grade-btn" data-grade="9">Grade 9</button>
+          <button class="grade-btn" data-grade="10">Grade 10</button>
+          <button class="grade-btn" data-grade="11">Grade 11</button>
+          <button class="grade-btn" data-grade="12" style="grid-column: span 3;">Grade 12 (Ulum & Usul)</button>
+        </div>
+
+        <div class="sidebar-title">
+          <span>Curriculum Quarter</span>
+        </div>
+
+        <div class="quarter-tabs">
+          <div class="quarter-item active" data-quarter="1">
+            <div class="quarter-info">
+              <h4>Q1: Aqidah & Tawheed</h4>
+              <p>Islamic Beliefs & Foundations</p>
+            </div>
+            <span class="quarter-status">Current</span>
+          </div>
+
+          <div class="quarter-item" data-quarter="2">
+            <div class="quarter-info">
+              <h4>Q2: Fiqh</h4>
+              <p>Practical Law & Action</p>
+            </div>
+            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+          </div>
+
+          <div class="quarter-item" data-quarter="3">
+            <div class="quarter-info">
+              <h4>Q3: Seerah & History</h4>
+              <p>Prophetic Life & Civilization</p>
+            </div>
+            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+          </div>
+
+          <div class="quarter-item" data-quarter="4">
+            <div class="quarter-info">
+              <h4>Q4: Adab & Character</h4>
+              <p>Manners, Leadership & Ethics</p>
+            </div>
+            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ascending Knowledge Levels Widget -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">
+          <span>Knowledge Progression</span>
+        </div>
+
+        <div class="level-meter">
+          <div class="level-step active current" id="step-1">
+            <div class="level-node">1</div>
+            <div class="level-label">
+              <h5>Level 1: Ma'lumat</h5>
+              <p>Information & Foundational Facts</p>
+            </div>
+          </div>
+
+          <div class="level-step" id="step-2">
+            <div class="level-node">2</div>
+            <div class="level-label">
+              <h5>Level 2: 'Ilm</h5>
+              <p>Textual Evidence & Reverence</p>
+            </div>
+          </div>
+
+          <div class="level-step" id="step-3">
+            <div class="level-node">3</div>
+            <div class="level-label">
+              <h5>Level 3: Fiqh</h5>
+              <p>Deep Understanding & Wisdoms</p>
+            </div>
+          </div>
+
+          <div class="level-step" id="step-4">
+            <div class="level-node">4</div>
+            <div class="level-label">
+              <h5>Level 4: Fahm</h5>
+              <p>Insight, Context & Judgment</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content View Area -->
+    <div style="flex: 1;">
+      
+      <!-- Student View Section -->
+      <section class="content-area" id="student-view">
+
+        <!-- Interactive Quest Tree Roadmap Map -->
+        <div class="quest-tree-card">
+          <div class="sidebar-title">
+            <span>🗺️ Quarter 1 Quest Map Roadmap</span>
+            <span style="color: var(--primary-emerald); font-size: 0.8rem;">4 Missions Available</span>
+          </div>
+          <div class="quest-map" id="quest-map">
+            <!-- Quest nodes dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Mission Banner Header -->
+        <div class="mission-header">
+          <div class="mission-meta">
+            <span class="meta-tag" id="mission-grade-tag">Grade 6 • Quarter 1</span>
+            <span class="meta-tag" id="mission-number-tag" style="background: rgba(16, 185, 129, 0.15); color: var(--primary-emerald); border-color: var(--primary-emerald);">Lesson 1 Mission</span>
+          </div>
+          <h1 class="mission-title" id="mission-title">Why Were We Created?</h1>
+          <p class="mission-subtitle" id="mission-subtitle">Discovering Human Purpose through Divine Revelation & Classical Wisdom</p>
+
+          <div class="objectives-card">
+            <div class="objectives-title">🎯 Mission Learning Objectives</div>
+            <ul class="objectives-list" id="objectives-list">
+              <!-- Objectives populated dynamically -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Dynamic Lesson Sections Container -->
+        <div id="dynamic-lesson-body">
+          <!-- Lesson sections rendered dynamically -->
+        </div>
+
+        <!-- Checkpoint Quiz Section -->
+        <article class="lesson-card" style="border-color: var(--accent-gold-glow);">
+          <div class="lesson-card-header">
+            <h2 class="card-title" style="color: var(--text-gold);"><span>🏆</span> Mission Verification Checkpoint</h2>
+            <span class="meta-tag" style="background: rgba(229, 193, 88, 0.2); color: var(--accent-gold);">Earn +100 XP</span>
+          </div>
+          <div id="quiz-container">
+            <!-- Quiz rendered dynamically -->
+          </div>
+        </article>
+
+        <!-- Islamic Terminology 3D Flashcards Widget -->
+        <article class="lesson-card">
+          <div class="lesson-card-header">
+            <h2 class="card-title"><span>🎴</span> Key Vocabulary & Terminology Flashcards</h2>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Click any card to flip & practice</span>
+          </div>
+          <div class="flashcard-container" id="flashcard-container">
+            <!-- Flashcards rendered dynamically -->
+          </div>
+        </article>
+
+        <!-- Digital Achievement & Badge Vault -->
+        <article class="lesson-card">
+          <div class="lesson-card-header">
+            <h2 class="card-title"><span>🎖️</span> Digital Achievement & Badge Vault</h2>
+            <span style="font-size: 0.8rem; color: var(--accent-gold);">Earned Achievements</span>
+          </div>
+          <div class="badge-grid" id="badge-grid">
+            <!-- Badges rendered dynamically -->
+          </div>
+        </article>
+
+      </section>
+
+      <!-- Parent & Teacher Dashboard View Section -->
+      <section class="dashboard-view" id="dashboard-view">
+        <div class="mission-header" style="background: linear-gradient(135deg, rgba(14, 32, 25, 0.95), rgba(6, 182, 212, 0.15)); border-color: var(--accent-cyan);">
+          <div class="mission-meta">
+            <span class="meta-tag" style="background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); border-color: var(--accent-cyan);">Parent & Educator Oversight</span>
+          </div>
+          <h1 class="mission-title">Student Progress & Analytics</h1>
+          <p class="mission-subtitle">Monitoring student engagement, quiz accuracy, and Socratic reflection logs for Grade 6</p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon">⭐</div>
+            <div class="metric-data">
+              <h3 id="dash-xp">450 XP</h3>
+              <p>Total Knowledge Points</p>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon">⚡</div>
+            <div class="metric-data">
+              <h3>3 Days</h3>
+              <p>Active Study Streak</p>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon">🎯</div>
+            <div class="metric-data">
+              <h3>100%</h3>
+              <p>Checkpoint Quiz Mastery</p>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-icon">📜</div>
+            <div class="metric-data">
+              <h3>Level 1</h3>
+              <p>Ma'lumat Stage</p>
+            </div>
+          </div>
+        </div>
+
+        <article class="lesson-card">
+          <div class="lesson-card-header">
+            <h2 class="card-title" style="color: var(--accent-cyan);"><span>📝</span> Socratic AI Reflection & Inquiry Logs</h2>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="background: rgba(7,18,14,0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.2rem;">Student Inquiry #1 • Grade 6</div>
+              <p style="font-size: 0.9rem; color: #fff;">"Why can intellect alone not find human purpose?"</p>
+              <div style="font-size: 0.8rem; color: var(--primary-emerald); margin-top: 0.4rem;">AI Response: Guided student to analyze the creator/creation boundary and Plato's admission.</div>
+            </div>
+
+            <div style="background: rgba(7,18,14,0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 0.2rem;">Student Inquiry #2 • Grade 6</div>
+              <p style="font-size: 0.9rem; color: #fff;">"Can studying science be an act of worship?"</p>
+              <div style="font-size: 0.8rem; color: var(--primary-emerald); margin-top: 0.4rem;">AI Response: Guided student to connect righteous intention ('Ibadah) with studying creation for Allah.</div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Floating Socratic AI Tutor Button -->
+  <button class="ai-tutor-fab" id="toggle-ai-btn">
+    <div class="fab-pulse"></div>
+    <span>✨ AI Socratic Tutor</span>
+  </button>
+
+  <!-- Socratic AI Drawer Modal -->
+  <div class="ai-drawer" id="ai-drawer">
+    <div class="ai-drawer-header">
+      <div class="ai-header-top">
+        <div class="ai-drawer-title">
+          <span>✨</span>
+          <h3>Gen 3 Socratic Guide</h3>
+          <span class="ai-badge">AI Partner</span>
+        </div>
+        <button class="close-btn" id="close-ai-btn">&times;</button>
+      </div>
+
+      <div class="ai-mode-selector">
+        <button class="ai-mode-btn active" onclick="setAiMode('foundational', this)">Grades 6–8 (Foundational)</button>
+        <button class="ai-mode-btn" onclick="setAiMode('transition', this)">Grades 9–10 (Evidence)</button>
+        <button class="ai-mode-btn" onclick="setAiMode('advanced', this)">Grades 11–12 (Debate)</button>
+      </div>
+    </div>
+
+    <div class="ai-messages" id="ai-messages">
+      <div class="chat-bubble ai">
+        Assalamu Alaikum! I am your Gen 3 Socratic Learning Partner. I'm here to help you reflect, discover, and earn your answers. What question would you like to explore?
+      </div>
+    </div>
+
+    <div class="prompt-suggestions">
+      <button class="chip-btn" onclick="sendSuggestedPrompt('Why can intellect alone not find human purpose?')">Why intellect alone?</button>
+      <button class="chip-btn" onclick="sendSuggestedPrompt('Give me a hint for Question 2')">Hint for Q2</button>
+      <button class="chip-btn" onclick="sendSuggestedPrompt('Can studying science be an act of worship?')">Is science worship?</button>
+    </div>
+
+    <div class="ai-input-area">
+      <input type="text" class="ai-input" id="ai-user-input" placeholder="Ask a question or request a guided hint..." onkeypress="if(event.key==='Enter') handleUserMessage()">
+      <button class="send-btn" onclick="handleUserMessage()">➔</button>
+    </div>
+  </div>
+
+  <!-- XP & Level Up Reward Modal -->
+  <div class="reward-modal" id="reward-modal">
+    <div class="reward-content">
+      <div class="reward-icon">🏆</div>
+      <h2 class="reward-title" id="reward-title">Mission Complete!</h2>
+      <p class="reward-desc" id="reward-desc">You completed the verification checkpoint and earned +100 XP!</p>
+      <button class="reward-btn" onclick="closeRewardModal()">Claim Rewards & Continue</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
