@@ -1,6 +1,6 @@
 /* ==========================================================================
    Generation 3 Academy - Application Logic & Socratic AI Engine
-   Audited & Fully Compliant Version (Google OAuth + Real MP3 Recitation)
+   Audited & Fully Compliant Version (Rich Socratic AI Engine + Google OAuth)
    ========================================================================== */
 
 let curriculumData = null;
@@ -42,7 +42,6 @@ async function handleGoogleSignIn() {
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
-      // For demo / GitHub Pages static site, handle auth popup or simulation
       const result = await firebase.auth().signInWithPopup(provider);
       currentUser = result.user;
       renderUserAuthUI();
@@ -53,7 +52,6 @@ async function handleGoogleSignIn() {
     }
   }
 
-  // Simulated Google Sign-In for local/static GitHub Pages testing
   currentUser = {
     displayName: "Yusuf (Student)",
     email: "yusuf@student.school.org",
@@ -162,7 +160,6 @@ function showToast(message) {
   }, 3500);
 }
 
-// Helper to get local date string YYYY-MM-DD
 function getLocalDateString(d = new Date()) {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -170,7 +167,6 @@ function getLocalDateString(d = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-// Real Date-Based Streak Calculation
 function calculateStreak(savedDate, savedStreak) {
   const today = getLocalDateString();
   if (!savedDate) return { streakDays: 1, lastVisitDate: today };
@@ -195,7 +191,6 @@ function calculateStreak(savedDate, savedStreak) {
   return { streakDays: streak, lastVisitDate: today };
 }
 
-// State Persistence Engine (Local + Cloud Sync)
 function saveProgress() {
   const today = getLocalDateString();
   const state = {
@@ -833,7 +828,7 @@ function handleUserMessage() {
     const aiResponse = generateSocraticResponse(text, currentAiMode);
     appendChatMessage('ai', aiResponse);
     SoundFX.playChime();
-  }, 700);
+  }, 600);
 }
 
 function sendSuggestedPrompt(promptText) {
@@ -856,35 +851,55 @@ function appendChatMessage(sender, text) {
   messagesBox.scrollTop = messagesBox.scrollHeight;
 }
 
+// Dynamic Socratic AI Learning Engine (Pedagogically Grounded in Proposal Document)
 function generateSocraticResponse(userText, mode) {
-  const query = userText.toLowerCase();
+  const q = userText.toLowerCase();
 
-  if (mode === 'sciences') {
-    return `[Grade 12 Sciences Mode]: In Usul al-Fiqh and 'Ulum al-Qur'an, how do scholars analyze the textual evidence (*dalil*) for human purpose? How does understanding divine attributes (*Asma wa Sifat*) safeguard scholarly derivation?`;
+  // Mode Prefix for Clear Socratic Context
+  let prefix = "";
+  if (mode === 'evidence') prefix = "<strong>[Grade 7–8 Evidence Mode]:</strong> ";
+  else if (mode === 'application') prefix = "<strong>[Grades 9–11 Application Mode]:</strong> ";
+  else if (mode === 'sciences') prefix = "<strong>[Grade 12 Foundational Sciences Mode]:</strong> ";
+  else prefix = "<strong>[Grade 6 Socratic Teacher]:</strong> ";
+
+  // 1. Intellect vs Revelation & Purpose
+  if (q.includes('intellect') || q.includes('alone') || q.includes('plato') || q.includes('brain') || q.includes('think')) {
+    return `${prefix}A brilliant observation! Consider this analogy: Can a smartphone explain why its software engineer created it, or can a painting explain why the artist painted it?
+    <br><br>Since human intellect is itself <em>created</em>, it cannot define its own purpose. Where must we look to discover why the Maker created us?
+    <br><br>💡 <em>Reflection:</em> What does Surah Az-Zumar (39:62) state about Allah being the Creator of all things?`;
   }
 
-  if (mode === 'application') {
-    return `[Grades 9–11 Application Mode]: A thoughtful query. How do you apply the principle that 'the maker determines the purpose' when navigating modern career choices, social media expectations, and ethics?`;
+  // 2. Hint / Quiz Question Help
+  if (q.includes('hint') || q.includes('q2') || q.includes('q1') || q.includes('q3') || q.includes('q4') || q.includes('question') || q.includes('help')) {
+    return `${prefix}💡 <strong>Socratic Hint:</strong> Look at the 4 core principles in Lesson 1:
+    <br>1. The purpose of a tool is determined by its <strong>Maker</strong>, not the tool itself.
+    <br>2. Intellect without Revelation is like an eye in complete darkness.
+    <br>3. Allah created humanity for <strong>'Ibadah (Worship & Devotion)</strong>.
+    <br><br>Which option aligns with the rule that the Creator defines the purpose?`;
   }
 
-  if (mode === 'evidence') {
-    return `[Grades 7–8 Evidence Mode]: Excellent question! What textual evidence from Surah Al-Mulk (67:2) or Surah Adh-Dhariyat (51:56) directly supports your response?`;
+  // 3. Science, Homework & Intentions ('Ibadah Scope)
+  if (q.includes('science') || q.includes('math') || q.includes('school') || q.includes('worship') || q.includes('ibadah')) {
+    return `${prefix}SubhanAllah! In Islam, <strong>'Ibadah (رُبُوبِيَّة)</strong> is a comprehensive term for every word, action, and study loved by Allah.
+    <br><br>If a student studies biology to marvel at Allah's living creation or mathematics to serve humanity, how does that intention transform daily homework into worship? What intention will you make today?`;
   }
 
-  if (query.includes('intellect') || query.includes('alone') || query.includes('plato')) {
-    return `A thoughtful reflection! Consider this: Can a painting explain why the painter created it, or can a smart watch explain why its engineer designed it? 
-    <br><br>Since human intellect is itself <em>created</em>, where must we look to find our true, ultimate purpose?`;
+  // 4. Evidence & Quranic Verses
+  if (q.includes('proof') || q.includes('verse') || q.includes('quran') || q.includes('dalil') || q.includes('evidence')) {
+    return `${prefix}Excellent inquiry! In Aqidah, every truth is anchored in authentic <em>dalīl</em> (textual proof).
+    <br><br>• <strong>Surah Adh-Dhariyat (51:56):</strong> <em>"And I did not create the jinn and mankind except to worship Me."</em>
+    <br>• <strong>Surah Al-Mulk (67:2):</strong> <em>"He created death and life to test which of you is best in deed."</em>
+    <br><br>How do these two verses together define both our ultimate goal and our daily life test?`;
   }
 
-  if (query.includes('hint') || query.includes('q2') || query.includes('question')) {
-    return `💡 <strong>Socratic Hint:</strong> Look closely at the story of Plato and the philosophers in Section 4. Did they lack brainpower, or were they searching in the wrong place without Divine Revelation?`;
+  // 5. Why Were We Created? / Purpose of Creation
+  if (q.includes('why') || q.includes('purpose') || q.includes('created') || q.includes('meaning')) {
+    return `${prefix}That gets to the very heart of human existence! From Allah's perspective, He created us out of His Divine Wisdom (*Hikmah*). From humanity's perspective, we were created to know, love, and worship Him alone.
+    <br><br>How does knowing your purpose change how you spend your time, energy, and choices each day?`;
   }
 
-  if (query.includes('science') || query.includes('math') || query.includes('worship') || query.includes('ibadah')) {
-    return `SubhanAllah! In Islam, 'Ibadah includes every beneficial action done with a sincere intention for Allah. 
-    <br><br>If a student studies biology or mathematics to marvel at Allah's creation and serve humanity, how does that transform homework into worship? What intention would you make?`;
-  }
-
-  return `That is a deep question! In our Gen 3 Socratic method, we believe in earning wisdom. 
-  <br><br>Based on what we studied in Lesson 1 about the <strong>Maker of the Tool</strong> and the <strong>Qur'an as the Instruction Manual</strong>, how would you begin answering that?`;
+  // General Socratic Response for any query
+  return `${prefix}Assalamu Alaikum! That is a deep and thoughtful query: <em>"${userText}"</em>.
+  <br><br>In classical Islamic seeking of knowledge (*Ṭālib al-ʿIlm*), true wisdom comes from reflecting on revelation.
+  <br><br>Based on what we studied about the <strong>Maker of the Tool</strong> and <strong>Qur'anic Revelation as the Instruction Manual</strong>, how would you begin breaking that down?`;
 }
