@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gen 3 Academy — Socratic AI Teacher</title>
+  <meta name="description" content="Talk with a Socratic AI teacher that guides you to discover the answers yourself.">
+  <link rel="stylesheet" href="ai.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <span class="hdr-mark">G3</span>
+      <div class="hdr-titles">
+        <h1>Socratic Teacher</h1>
+        <p id="hdr-lesson">Loading lesson…</p>
+      </div>
+    </div>
+    <div class="hdr-actions">
+      <select id="lesson-select" class="lesson-select" aria-label="Choose lesson"></select>
+      <a href="index.html" class="hdr-link" title="Student Portal">🎓</a>
+      <a href="game.html" class="hdr-link" title="Rihla Game">🎮</a>
+    </div>
+  </header>
+
+  <!-- ============ CHAT SCREEN ============ -->
+  <main id="screen-chat" class="screen">
+    <div class="chat-scroll" id="chat-scroll">
+
+      <!-- Welcome / starters -->
+      <section class="welcome" id="welcome">
+        <div class="welcome-orb"></div>
+        <h2 class="welcome-title">Let's discover it together</h2>
+        <p class="welcome-sub">
+          Ask me anything about this lesson. I won't hand you the answer —
+          I'll ask you questions until <em>you</em> find it. That is how knowledge is earned.
+        </p>
+        <div class="starters" id="starters"></div>
+      </section>
+
+      <div id="messages" class="messages"></div>
+    </div>
+
+    <!-- Composer -->
+    <div class="composer">
+      <div class="composer-inner">
+        <textarea id="input" class="composer-input" rows="1" placeholder="Ask the teacher a question…"></textarea>
+        <button id="send" class="send-btn" aria-label="Send">➔</button>
+      </div>
+      <div class="composer-row">
+        <span class="composer-hint">The teacher guides — it never gives answers.</span>
+        <button id="finish-btn" class="finish-btn" disabled>Finish &amp; see what I discovered ✦</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ REPORT SCREEN ============ -->
+  <section id="screen-report" class="screen hidden">
+    <div class="report-wrap">
+      <div class="report-badge">✦ Session Complete</div>
+      <div id="report-body" class="report-body"></div>
+      <div class="report-actions">
+        <button class="btn-ghost" onclick="AI.backToChat()">← Keep discussing</button>
+        <button class="btn-primary" onclick="AI.newSession()">Start a new session</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="ai.js"></script>
+</body>
+</html>

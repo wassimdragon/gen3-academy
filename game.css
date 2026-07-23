@@ -281,3 +281,63 @@ body.theme-desert::before  { background-color: #170d1a; }
   .screen-enter, .node.current .node-btn, body::after, .celeb-icon, .celeb-card, .tutor-drawer { animation: none !important; }
   .trail-fill { transition: none; }
 }
+
+/* ==========================================================================
+   Socratic Discussion Checkpoint (replaces multiple-choice at stations)
+   ========================================================================== */
+.disc { display: flex; flex-direction: column; gap: .75rem; }
+.disc-tag {
+  font-size: .75rem; font-weight: 600; color: var(--gold);
+  background: rgba(229,193,88,.1); border: 1px solid var(--glass-border);
+  padding: .45rem .8rem; border-radius: 999px; text-align: center;
+}
+.disc-msgs {
+  display: flex; flex-direction: column; gap: .7rem;
+  max-height: 46vh; overflow-y: auto; padding: .25rem;
+}
+.disc-msg { display: flex; gap: .55rem; align-items: flex-start; animation: fadeIn .25s ease-out; }
+.disc-av {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .8rem; margin-top: .1rem;
+}
+.disc-msg.ai   .disc-av { background: linear-gradient(135deg, var(--gold-soft), var(--gold)); color: #0a0b1e; }
+.disc-msg.user .disc-av { background: rgba(255,255,255,.08); border: 1px solid var(--glass-border); }
+.disc-txt {
+  padding: .65rem .9rem; border-radius: 14px; font-size: .92rem; line-height: 1.55;
+  background: rgba(255,255,255,.04); border: 1px solid var(--glass-border);
+}
+.disc-msg.ai   .disc-txt { border-top-left-radius: 4px; }
+.disc-msg.user { flex-direction: row-reverse; }
+.disc-msg.user .disc-txt { background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.3); border-top-right-radius: 4px; }
+.disc-msg.typing .disc-txt { opacity: .6; letter-spacing: .2em; }
+.disc-msg.err .disc-txt { border-color: #ef4444; color: #fca5a5; }
+
+.disc-composer {
+  display: flex; align-items: flex-end; gap: .5rem;
+  background: rgba(10,11,30,.6); border: 1px solid var(--glass-border);
+  border-radius: 16px; padding: .4rem .4rem .4rem .85rem;
+}
+.disc-composer:focus-within { border-color: var(--gold); }
+.disc-input {
+  flex: 1; background: none; border: none; color: var(--text); resize: none;
+  font-family: var(--font-body); font-size: .92rem; line-height: 1.5; max-height: 120px; padding: .45rem 0;
+}
+.disc-input:focus { outline: none; }
+.disc-send {
+  flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold)); color: #0a0b1e; font-size: 1rem; font-weight: 700;
+}
+.disc-send:disabled { opacity: .4; cursor: not-allowed; }
+
+.disc-win {
+  text-align: center; padding: 1.1rem; border-radius: 14px; margin-top: .3rem;
+  background: rgba(52,211,153,.12); border: 1px solid var(--emerald);
+  animation: fadeIn .3s ease-out;
+}
+.disc-win strong { color: var(--emerald); font-size: 1.05rem; }
+.disc-win p { font-size: .88rem; color: var(--text); margin: .35rem 0 .8rem; }
+
+.disc-note {
+  background: rgba(229,193,88,.1); border-left: 3px solid var(--gold);
+  padding: .85rem; border-radius: 10px; font-size: .88rem;
+}

@@ -10,6 +10,16 @@ const SCORE_PER_Q = 20;
 const REGION_BONUS = 50;
 const MAX_TRIES = 3;
 
+// --- Socratic discussion checkpoints -------------------------------------
+// Each checkpoint station is a DISCUSSION with the AI teacher instead of a
+// multiple-choice question. The student earns the station by explaining the
+// idea in their own words. If the AI is unreachable (offline / quota spent),
+// we fall back to the old multiple-choice so the game never breaks.
+const WORKER_URL = 'https://gen3-ai.gwassimdragon.workers.dev';
+const DISCUSSION_ENABLED = true;
+const FREE_TURNS = 2;   // master it within this many replies = full points
+const HELP_TURNS = 6;   // after this many, the teacher gently explains
+
 const COLORS = { gold:'#e5c158', emerald:'#34d399', cyan:'#38bdf8', rose:'#e879a6', violet:'#8b7bf0' };
 
 const RANKS = [
@@ -422,7 +432,17 @@ const Game = {
       this.currentQ = stage.question;
       this.tries = MAX_TRIES;
       this.hintIdx = 0;
-      card.innerHTML = header + '<div class="q-box">' +
+      this._header = header;
+      if (DISCUSSION_ENABLED) this.renderDiscussion();
+      else this.renderMCQ();
+    }
+  },
+
+  /* ---------------- checkpoint: multiple-choice (fallback) ---------------- */
+  renderMCQ(note) {
+    document.getElementById('stage-card').innerHTML = this._header +
+      (note ? '<div class="disc-note">' + this.esc(note) + '</div>' : '') +
+      '<div class="q-box">' +
         '<div class="q-text">❓ ' + this.esc(this.currentQ.question) + '</div>' +
         '<div class="q-opts" id="q-opts">' +
         this.currentQ.options.map((opt, i) =>
@@ -430,8 +450,161 @@ const Game = {
         ).join('') +
         '</div>' +
         '<div id="q-feedback" class="q-feedback hidden"></div>' +
-        '</div>';
+      '</div>';
+  },
+
+  /* ---------------- checkpoint: Socratic discussion ---------------- */
+  renderDiscussion() {
+    this.disc = { turns: 0, history: [], done: false, busy: false };
+    document.getElementById('stage-card').innerHTML = this._header +
+      '<div class="disc">' +
+        '<div class="disc-tag">✦ Discuss with the Teacher — explain it in your own words to pass this station</div>' +
+        '<div class="disc-msgs" id="disc-msgs"></div>' +
+        '<div class="disc-composer" id="disc-composer">' +
+          '<textarea id="disc-input" class="disc-input" rows="1" placeholder="Type what you think…"></textarea>' +
+          '<button class="disc-send" id="disc-send" onclick="Game.sendDiscussion()">➔</button>' +
+        '</div>' +
+      '</div>';
+    // The teacher opens with the checkpoint question (no API call needed).
+    this.pushDisc('ai', this.currentQ.question);
+    const input = document.getElementById('disc-input');
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendDiscussion(); }
+    });
+    input.focus();
+  },
+
+  pushDisc(role, text, cls) {
+    const box = document.getElementById('disc-msgs');
+    if (!box) return null;
+    const d = document.createElement('div');
+    d.className = 'disc-msg ' + role + (cls ? ' ' + cls : '');
+    const av = role === 'ai' ? '✦' : this.emblemGlyph(this.state);
+    d.innerHTML = '<span class="disc-av">' + av + '</span><span class="disc-txt">' + this.esc(text) + '</span>';
+    box.appendChild(d); box.scrollTop = box.scrollHeight;
+    return d;
+  },
+
+  // What the student must reach, built from the existing checkpoint data.
+  checkpointGoal() {
+    const q = this.currentQ;
+    const correct = (q.options && q.options[q.answer] != null) ? q.options[q.answer] : '';
+    return q.question +
+      (correct ? ' | Understanding to reach: ' + correct + '.' : '') +
+      (q.explanation ? ' | Because: ' + q.explanation : '') +
+      (q.dalil ? ' | Evidence: ' + q.dalil : '');
+  },
+
+  // Vetted lesson text — the AI's only permitted source.
+  lessonTextForAI() {
+    const l = this.data.lessons[this.currentRegionIdx];
+    let out = 'Lesson ' + l.lessonNumber + ': ' + l.title + '\n' + (l.subtitle || '') + '\n';
+    if ((l.objectives || []).length) {
+      out += '\nLearning objectives for this lesson:\n' + l.objectives.map(o => '- ' + o).join('\n') + '\n';
     }
+    (l.sections || []).forEach(s => {
+      out += '## ' + (s.title || '') + '\n';
+      ['content', 'story', 'takeaway', 'explanation', 'solution', 'intro'].forEach(k => { if (s[k]) out += s[k] + '\n'; });
+      if (s.callout) out += s.callout.title + ': ' + s.callout.text + '\n';
+      (s.verses || []).forEach(v => {
+        out += 'VERSE ' + v.surah + ' — "' + v.translation + '" (' + v.arabic + ')' + (v.note ? ' — ' + v.note : '') + '\n';
+      });
+      (s.categories || []).forEach(c => { out += c.name + ': ' + (c.examples || []).join(', ') + '\n'; });
+    });
+    return out.slice(0, 18000);
+  },
+
+  async sendDiscussion() {
+    if (!this.disc || this.disc.done || this.disc.busy) return;
+    const input = document.getElementById('disc-input');
+    const text = (input.value || '').trim();
+    if (!text) return;
+
+    input.value = '';
+    this.pushDisc('user', text);
+    this.disc.history.push({ role: 'user', text });
+    this.disc.turns++;
+    this.disc.busy = true;
+    const sendBtn = document.getElementById('disc-send');
+    if (sendBtn) sendBtn.disabled = true;
+    const typing = this.pushDisc('ai', '…', 'typing');
+
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'checkpoint',
+          message: text,
+          goal: this.checkpointGoal(),
+          lesson: this.lessonTextForAI(),
+          history: this.disc.history.slice(-8, -1),
+          turns: this.disc.turns,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (typing) typing.remove();
+      if (!res.ok || !data.reply) throw new Error(data.error || 'no reply');
+
+      this.pushDisc('ai', data.reply);
+      this.disc.history.push({ role: 'ai', text: data.reply });
+
+      if (data.mastered === true) this.masteredDiscussion();
+      else if (this.disc.turns >= HELP_TURNS) this.offerReRead();
+
+    } catch (e) {
+      if (typing) typing.remove();
+      if (this.disc.turns <= 1) {
+        // AI unreachable on the very first try -> fall back so the game never breaks
+        showToast('⚠️ AI teacher unavailable — switching to the classic checkpoint.');
+        this.renderMCQ('The teacher could not be reached, so here is the multiple-choice checkpoint instead.');
+      } else {
+        this.pushDisc('ai', 'I could not reply just now. Please try once more.', 'err');
+      }
+    } finally {
+      if (this.disc) this.disc.busy = false;
+      const s = document.getElementById('disc-send');
+      if (s) s.disabled = false;
+    }
+  },
+
+  masteredDiscussion() {
+    this.disc.done = true;
+    const t = this.disc.turns;
+    const pts = t <= FREE_TURNS ? SCORE_PER_Q : Math.max(5, SCORE_PER_Q - (t - FREE_TURNS) * 5);
+    const isReplay = this.currentStageIdx < (this.state.progress[this.regionId()] || 0);
+    const rankUp = isReplay ? false : this.addScore(pts);
+    SoundFX.playChime();
+
+    const box = document.getElementById('disc-msgs');
+    const win = document.createElement('div');
+    win.className = 'disc-win';
+    win.innerHTML = '<strong>🎉 You worked it out yourself!</strong>' +
+      (isReplay
+        ? '<p>Station already completed — no new points.</p>'
+        : '<p>+' + pts + ' points' + (t <= FREE_TURNS ? ' — full marks, you barely needed help!' : '') + '</p>') +
+      '<button class="btn btn-primary" onclick="Game.onQSuccess(' + rankUp + ')">Continue ➔</button>';
+    box.appendChild(win);
+    box.scrollTop = box.scrollHeight;
+    const comp = document.getElementById('disc-composer');
+    if (comp) comp.classList.add('hidden');
+  },
+
+  offerReRead() {
+    const box = document.getElementById('disc-msgs');
+    const d = document.createElement('div');
+    d.className = 'disc-note';
+    d.innerHTML = 'Still tricky? Go back over the passage, then return and explain it in your own words.' +
+      '<button class="btn btn-secondary" style="margin-top:.6rem" onclick="Game.reReadStation()">Re-read the lesson ➔</button>';
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  },
+
+  reReadStation() {
+    for (let i = this.currentStageIdx - 1; i >= 0; i--) {
+      if (this.stages[i].type === 'read') { this.currentStageIdx = i; this.renderStage(); return; }
+    }
+    this.renderStage();
   },
 
   answerQ(idx) {

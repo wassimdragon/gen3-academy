@@ -3,355 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generation 3 Academy - AI Gamified Islamic Studies</title>
-  <meta name="description" content="AI-assisted gamified Islamic Studies platform preparing the third generation of Muslim students in the West through classical scholarship and modern technology.">
-  <link rel="stylesheet" href="styles.css?v=1.0.4">
+  <title>Gen 3 Academy — The Journey</title>
+  <meta name="description" content="An interactive Islamic Studies learning game: travel the Rihla, earn knowledge, and rise through the ranks.">
+  <link rel="stylesheet" href="game.css?v=1.0.5">
 </head>
 <body>
 
-  <!-- Toast Notification Bar (Replaces native alerts) -->
+  <!-- Toast Notification Bar -->
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <!-- Top Navigation & Role Toggle Header -->
-  <header class="navbar">
-    <div class="brand" onclick="location.reload()">
-      <div class="brand-icon">G3</div>
-      <div class="brand-text">
-        <h1>GEN 3 ACADEMY</h1>
-        <p>AI-Gamified Islamic Studies</p>
-      </div>
-    </div>
-
-    <div class="nav-controls">
-      <div class="mode-toggle">
-        <button class="mode-btn active" id="btn-student-mode" onclick="switchView('student')">🎓 Student Portal</button>
-        <button class="mode-btn" id="btn-dashboard-mode" onclick="switchView('dashboard')">📊 Parent/Teacher Dashboard</button>
-        <a href="game.html" class="mode-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem; background: linear-gradient(135deg, rgba(229,193,88,0.2), rgba(16,185,129,0.2)); color: var(--accent-gold); border: 1px solid var(--accent-gold);">🎮 Celestial Rihla Game Mode</a>
-      </div>
-
-      <!-- 1-Click Google Authentication & Student Profile Chip -->
-      <div id="google-auth-container">
-        <button class="google-auth-btn" id="btn-google-login" onclick="handleGoogleSignIn()">
-          <span>🌐</span> Sign in with Google
-        </button>
-      </div>
-
-      <div class="user-stats">
-        <div class="stat-badge">
-          <span class="stat-icon">⚡</span>
-          <span id="streak-counter">1 Day Streak</span>
-        </div>
-
-        <div class="xp-bar-container">
-          <div class="stat-badge">
-            <span class="stat-icon">⭐</span>
-            <span id="xp-counter">0 / 600 XP</span>
-          </div>
-          <div class="xp-bar-track">
-            <div class="xp-bar-fill" id="xp-bar-fill"></div>
-          </div>
-        </div>
-
-        <div class="rank-pill" id="current-rank">
-          📜 Level 1: Ma'lumat
-        </div>
-      </div>
+  <!-- ============ TOP BAR (hidden on create/intro) ============ -->
+  <header id="topbar" class="topbar hidden">
+    <button class="tb-identity" onclick="Game.openProfileModal()" title="Click to view details & change student name">
+      <span class="tb-emblem" id="tb-emblem"></span>
+      <span class="tb-name" id="tb-name">Seeker</span>
+      <span style="font-size: 0.7rem; opacity: 0.7; margin-left: 0.2rem;">✏️</span>
+    </button>
+    <div class="tb-stats">
+      <span class="tb-rank pill" id="tb-rank">📜 Ma'lumat</span>
+      <span class="tb-score pill" id="tb-score">⭐ 0</span>
+      <button class="tb-profile" onclick="Game.openProfileModal()" aria-label="Open profile customization">🎨</button>
     </div>
   </header>
 
-  <!-- Main Grid App Layout -->
-  <main class="app-container">
+  <!-- ============ SCREEN: CREATE EMBLEM + NAME ============ -->
+  <section id="screen-create" class="screen screen-center">
+    <div class="card create-card">
+      <div class="brand-mini">GEN 3 ACADEMY</div>
+      <h1 class="create-title">Begin Your Rihla</h1>
+      <p class="create-sub">Every journey of knowledge starts with a single step. First, shape your identity.</p>
 
-    <!-- Left Sidebar Navigation -->
-    <aside class="sidebar">
-
-      <!-- Grade & Quarter Selector Card -->
-      <div class="sidebar-card">
-        <div class="sidebar-title">
-          <span>Grade & Quarter</span>
-          <span style="font-size: 0.7rem; color: var(--accent-gold);">Rihla Map</span>
-        </div>
-
-        <!-- Grade Buttons -->
-        <div class="grade-selector" role="group" aria-label="Select Grade Level">
-          <button class="grade-btn active" data-grade="6">Grade 6</button>
-          <button class="grade-btn" data-grade="7">Grade 7</button>
-          <button class="grade-btn" data-grade="8">Grade 8</button>
-          <button class="grade-btn" data-grade="9">Grade 9</button>
-          <button class="grade-btn" data-grade="10">Grade 10</button>
-          <button class="grade-btn" data-grade="11">Grade 11</button>
-          <button class="grade-btn" data-grade="12" style="grid-column: span 3;">Grade 12 (Foundational Sciences)</button>
-        </div>
-
-        <!-- Quarter Progression List -->
-        <div class="quarter-tabs" id="quarter-tabs-container">
-          <div class="quarter-item active" data-quarter="1">
-            <div class="quarter-info">
-              <h4>Q1: Aqidah & Tawheed</h4>
-              <p>Islamic Beliefs & Foundations</p>
-            </div>
-            <span class="quarter-status">Current</span>
-          </div>
-          <div class="quarter-item" data-quarter="2">
-            <div class="quarter-info">
-              <h4>Q2: Fiqh</h4>
-              <p>Practical Law & Action</p>
-            </div>
-            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
-          </div>
-          <div class="quarter-item" data-quarter="3">
-            <div class="quarter-info">
-              <h4>Q3: Seerah & History</h4>
-              <p>Prophetic Life & Civilization</p>
-            </div>
-            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
-          </div>
-          <div class="quarter-item" data-quarter="4">
-            <div class="quarter-info">
-              <h4>Q4: Adab & Character</h4>
-              <p>Manners, Leadership & Ethics</p>
-            </div>
-            <span class="quarter-status" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Locked</span>
-          </div>
-        </div>
+      <label class="field-label">Choose your emblem</label>
+      <div class="emblem-picker" id="emblem-picker">
+        <button class="emblem-opt selected" data-emblem="lantern">
+          <span class="emblem-glyph">🏮</span><span class="emblem-word">Lantern</span>
+        </button>
+        <button class="emblem-opt" data-emblem="crest">
+          <span class="emblem-glyph">🛡️</span><span class="emblem-word">Crest</span>
+        </button>
+        <button class="emblem-opt" data-emblem="calligraphy">
+          <span class="emblem-glyph calli" id="calli-preview">أ</span><span class="emblem-word">Calligraphy</span>
+        </button>
       </div>
 
-      <!-- 4 Ascending Levels of Knowledge (Classical Islamic Pedagogy) -->
-      <div class="sidebar-card">
-        <div class="sidebar-title">
-          <span>Knowledge Ascension</span>
-          <span style="font-size: 0.7rem; color: var(--primary-emerald);">4 Levels</span>
-        </div>
-
-        <div class="level-meter">
-          <div class="level-step active current" id="step-1">
-            <div class="level-node">1</div>
-            <div class="level-label">
-              <h5>📜 Level 1: Ma'lumat</h5>
-              <p>Information & Recognition</p>
-            </div>
-          </div>
-          <div class="level-step" id="step-2">
-            <div class="level-node">2</div>
-            <div class="level-label">
-              <h5>📖 Level 2: 'Ilm</h5>
-              <p>Structured Knowledge</p>
-            </div>
-          </div>
-          <div class="level-step" id="step-3">
-            <div class="level-node">3</div>
-            <div class="level-label">
-              <h5>🧠 Level 3: Fiqh</h5>
-              <p>Deep Understanding</p>
-            </div>
-          </div>
-          <div class="level-step" id="step-4">
-            <div class="level-node">4</div>
-            <div class="level-label">
-              <h5>🌟 Level 4: Fahm</h5>
-              <p>Wisdom & Practical Insight</p>
-            </div>
-          </div>
-        </div>
+      <label class="field-label">Pick a color</label>
+      <div class="color-picker" id="color-picker">
+        <button class="color-opt selected" data-color="gold" style="--c:#e5c158"></button>
+        <button class="color-opt" data-color="emerald" style="--c:#10b981"></button>
+        <button class="color-opt" data-color="cyan" style="--c:#06b6d4"></button>
+        <button class="color-opt" data-color="rose" style="--c:#e879a6"></button>
+        <button class="color-opt" data-color="violet" style="--c:#a855f7"></button>
       </div>
 
-    </aside>
+      <label class="field-label" for="name-input">Your name</label>
+      <input id="name-input" class="name-input" type="text" maxlength="18" placeholder="e.g. Yusuf" oninput="Game.onNameType()">
 
-    <!-- Center Content View Area -->
-    <div class="main-view">
+      <div class="live-preview">
+        <div class="preview-emblem" id="preview-emblem"></div>
+        <div class="preview-name" id="preview-name">Seeker</div>
+      </div>
 
-      <!-- Student Learning View -->
-      <section class="content-area" id="student-view">
-
-        <!-- Rihla Quest Map Nodes Bar -->
-        <div class="quest-tree-card">
-          <div class="sidebar-title" style="margin-bottom: 0.5rem;">
-            <span>🗺️ Rihla Mission Nodes (Quarter 1)</span>
-            <span style="font-size: 0.75rem; color: var(--accent-gold);">Sequential Progression</span>
-          </div>
-          <div class="quest-map" id="quest-map">
-            <!-- Dynamically populated by app.js -->
-          </div>
-        </div>
-
-        <!-- Mission Header Banner -->
-        <header class="mission-header">
-          <div class="mission-meta">
-            <span class="meta-tag" id="mission-grade-tag">Grade 6 · Aqidah</span>
-            <span class="meta-tag" id="mission-number-tag" style="border-color: var(--primary-emerald); color: var(--primary-emerald); background: rgba(16,185,129,0.12);">Lesson 1 Mission</span>
-          </div>
-          <h1 class="mission-title" id="mission-title">Why Were We Created?</h1>
-          <p class="mission-subtitle" id="mission-subtitle">Discovering Human Purpose through Divine Revelation & Classical Wisdom</p>
-
-          <div class="objectives-card">
-            <div class="objectives-title">
-              <span>🎯</span> Core Learning Objectives
-            </div>
-            <ul class="objectives-list" id="objectives-list">
-              <!-- Objectives dynamically loaded -->
-            </ul>
-          </div>
-        </header>
-
-        <!-- Dynamic Lesson Body View -->
-        <div id="dynamic-lesson-body">
-          <!-- Dynamic sections rendered here by app.js -->
-        </div>
-
-        <!-- Verification Checkpoint & Gatekeeper Card -->
-        <article class="lesson-card" style="border-color: var(--accent-gold);">
-          <div class="lesson-card-header">
-            <h2 class="card-title"><span>🛡️</span> Mission Checkpoint: Verification & Assessment</h2>
-            <span class="meta-tag" id="checkpoint-status-tag" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-color: #ef4444;">
-              🔒 Locked (Engage AI Tutor or Analogy to Unlock)
-            </span>
-          </div>
-          <p style="color: var(--text-muted); margin-bottom: 1rem;">
-            Demonstrate your understanding to complete the mission, earn +100 XP, and unlock the next station on your Rihla Quest Map.
-          </p>
-
-          <!-- Gatekeeper Warning Banner -->
-          <div id="quiz-gatekeep-notice" style="background: rgba(229,193,88,0.1); border: 1px dashed var(--accent-gold); padding: 1.25rem; border-radius: 12px; text-align: center; margin-bottom: 1.5rem;">
-            <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">💡 Socratic Effort Gatekeeper</div>
-            <strong style="color: var(--accent-gold);">Pedagogical Requirement:</strong>
-            <p style="font-size: 0.88rem; color: var(--text-main); margin-top: 0.3rem;">
-              To unlock this Verification Checkpoint, you must engage with the Socratic AI Tutor <strong>OR</strong> complete the Strange Tool Analogy exploration above! Knowledge in Islam is earned step by step through reflection.
-            </p>
-          </div>
-
-          <!-- Quiz Container (Disabled until effort requirement met) -->
-          <div id="quiz-container" style="opacity: 0.4; pointer-events: none; transition: all 0.4s ease;">
-            <!-- Quiz dynamically rendered by app.js -->
-          </div>
-        </article>
-
-        <!-- Terminology 3D Flashcards Vault -->
-        <section class="lesson-card">
-          <div class="lesson-card-header">
-            <h2 class="card-title"><span>🎴</span> Key Arabic Terminology Vault</h2>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Click any card to flip & reveal meaning 🔄</span>
-          </div>
-          <div class="flashcard-container" id="flashcard-container">
-            <!-- Flashcards dynamically rendered -->
-          </div>
-        </section>
-
-      </section>
-
-      <!-- Parent & Teacher Dashboard View -->
-      <section class="dashboard-view" id="dashboard-view">
-        <header class="mission-header">
-          <div class="mission-meta">
-            <span class="meta-tag">Educator & Parent View</span>
-            <span class="meta-tag" style="border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(6,182,212,0.12);">Real-Time Metrics</span>
-          </div>
-          <h1 class="mission-title">Student Growth & Mastery Dashboard</h1>
-          <p class="mission-subtitle">Monitor student progress, Socratic AI reflections, accuracy rates, and active study streaks.</p>
-        </header>
-
-        <!-- Metrics Overview Grid -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-icon">⭐</div>
-            <div class="metric-data">
-              <h3 id="dash-xp">0 XP</h3>
-              <p>Total XP Earned</p>
-            </div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon">⚡</div>
-            <div class="metric-data">
-              <h3 id="dash-streak">1 Days</h3>
-              <p>Active Study Streak</p>
-            </div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon">🎯</div>
-            <div class="metric-data">
-              <h3 id="dash-accuracy">100%</h3>
-              <p>Checkpoint Accuracy</p>
-            </div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon">📜</div>
-            <div class="metric-data">
-              <h3 id="dash-rank">Ma'lumat</h3>
-              <p>Current Knowledge Rank</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Earned Badges Vault Grid -->
-        <article class="lesson-card">
-          <div class="lesson-card-header">
-            <h2 class="card-title"><span>🏆</span> Student Badges & Accomplishments Vault</h2>
-          </div>
-          <div class="badge-grid" id="badge-grid">
-            <!-- Badges dynamically rendered -->
-          </div>
-        </article>
-      </section>
-
+      <button class="btn btn-primary btn-full" onclick="Game.createProfile()">Begin Journey ➔</button>
     </div>
-  </main>
+  </section>
 
-  <!-- Floating Socratic AI Tutor Button -->
-  <button class="ai-tutor-fab" id="toggle-ai-btn" aria-label="Open Gen 3 Socratic AI Partner">
-    <span class="fab-pulse"></span>
-    <span>✨ Ask Gen 3 Socratic Teacher</span>
-  </button>
+  <!-- ============ SCREEN: INTRO HOW IT WORKS ============ -->
+  <section id="screen-intro" class="screen screen-center hidden">
+    <div class="card intro-card">
+      <div class="intro-icon">📜</div>
+      <h2 class="intro-title">The Path of Seeking Knowledge</h2>
+      <p class="intro-sub">In classical Islam, knowledge was earned step by step. Here is how your journey unfolds:</p>
 
-  <!-- Socratic AI Drawer -->
-  <div class="ai-drawer" id="ai-drawer">
-    <div class="ai-drawer-header">
-      <div class="ai-header-top">
-        <div class="ai-drawer-title">
-          <span>✨</span>
-          <h3>Gen 3 Socratic Partner</h3>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <button onclick="promptGeminiApiKey()" class="chip-btn" style="border-color: var(--accent-gold); color: var(--accent-gold); padding: 0.2rem 0.5rem;" title="Configure Live Google Gemini API Key">⚙️ Gemini API</button>
-          <span class="ai-badge" id="ai-mode-badge">Grade 6 (Foundations)</span>
-          <button class="close-btn" id="close-ai-btn" aria-label="Close AI Drawer">&times;</button>
-        </div>
-      </div>
+      <ul class="intro-steps">
+        <li><span class="step-num">1</span> <strong>Travel the Trail:</strong> Stations unlock one by one as you read and demonstrate understanding.</li>
+        <li><span class="step-num">2</span> <strong>Earn Wisdom:</strong> Correct answers on your first try award full points. Mistakes open the Socratic Tutor for guidance.</li>
+        <li><span class="step-num">3</span> <strong>Ascend the Ranks:</strong> Rise through the 4 levels — <em>Ma'lumat → 'Ilm → Fiqh → Fahm</em>.</li>
+        <li><span class="step-num">4</span> <strong>Personalize Your Emblem:</strong> Unlock titles, halos, and themes as your knowledge deepens.</li>
+      </ul>
 
-      <div style="font-size: 0.75rem; color: var(--text-muted); padding-top: 0.2rem;" id="ai-mode-desc">
-        🤖 AI Mode auto-aligned to Grade 6: Guided discovery & structured recall
-      </div>
+      <button class="btn btn-primary btn-full" onclick="Game.goMap()">Enter the Realm ➔</button>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: MAP ============ -->
+  <section id="screen-map" class="screen hidden">
+    <div class="map-header">
+      <h1 class="map-title">Rihla Quest Trail</h1>
+      <div class="map-sub" id="map-sub">Grade 6 · Quarter 1 · Aqidah & Tawheed</div>
     </div>
 
-    <div class="ai-messages" id="ai-messages">
-      <div class="chat-bubble ai">
-        Assalamu Alaikum! I am your Gen 3 Socratic Learning Partner. I'm here to help you reflect, discover, and earn your answers. What question would you like to explore?
+    <div id="trail" class="trail">
+      <svg id="trail-svg" class="trail-svg">
+        <path id="trail-base" class="trail-base" fill="none" style="fill:none !important;" />
+        <path id="trail-fill" class="trail-fill" fill="none" style="fill:none !important;" />
+      </svg>
+      <div id="nodes"></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: STAGE (READ OR QUESTION) ============ -->
+  <section id="screen-stage" class="screen hidden">
+    <div id="stage-card" class="card stage-card">
+      <!-- dynamically populated by Game.renderStage() -->
+    </div>
+  </section>
+
+  <!-- ============ SCREEN: PROFILE / CUSTOMIZE ============ -->
+  <section id="screen-profile" class="screen hidden">
+    <div class="card profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="prof-avatar"></div>
+        </div>
+        <h2 class="profile-name" id="prof-name">Seeker</h2>
+        <div class="profile-tag" id="prof-tag"></div>
+        <div class="profile-rank" id="prof-rank">📜 Ma'lumat</div>
+        <div class="profile-score" id="prof-score">⭐ 0 Points</div>
+      </div>
+
+      <!-- Change Student Name Section -->
+      <div class="deco-section" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 1.1rem; border-radius: 14px;">
+        <h3 style="margin-top:0; color: var(--gold);">✏️ Change Student Name</h3>
+        <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 0.6rem;">Update your name tag for the portal and game leaderboard:</p>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="prof-name-input" class="name-input" maxlength="18" placeholder="Enter student name...">
+          <button class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;" onclick="Game.updateStudentName()">Save ➔</button>
+        </div>
+      </div>
+
+      <div class="deco-section">
+        <h3>Emblem Ring</h3>
+        <div class="deco-opts" id="opt-rings"></div>
+
+        <h3>Honorific Title</h3>
+        <div class="deco-opts" id="opt-tags"></div>
+
+        <h3>Realm Theme</h3>
+        <div class="deco-opts" id="opt-themes"></div>
+      </div>
+
+      <button class="btn btn-secondary btn-full" onclick="Game.goMap()" style="margin-top: 1.5rem;">Return to Trail ➔</button>
+    </div>
+  </section>
+
+  <!-- ============ TUTOR DRAWER (HINT ONLY) ============ -->
+  <div id="tutor-drawer" class="tutor-drawer hidden">
+    <div class="tutor-header">
+      <div class="tutor-title">✨ Gen 3 Socratic Teacher</div>
+      <button class="tutor-close" onclick="Game.closeTutor()">&times;</button>
+    </div>
+    <div id="tutor-body" class="tutor-body">
+      <div class="tutor-msg tutor-ai">
+        Assalamu Alaikum! I am here to guide your reflection. Knowledge that is earned is knowledge that endures.
       </div>
     </div>
+  </div>
+  <button id="tutor-fab" class="tutor-fab hidden" onclick="Game.openTutorDirect()" aria-label="Open AI tutor">💡</button>
 
-    <div class="prompt-suggestions">
-      <button class="chip-btn" onclick="sendSuggestedPrompt('Why can intellect alone not find human purpose?')">Why intellect alone?</button>
-      <button class="chip-btn" onclick="sendSuggestedPrompt('Give me a hint for Question 2')">Hint for Q2</button>
-      <button class="chip-btn" onclick="sendSuggestedPrompt('Can studying science be an act of worship?')">Is science worship?</button>
-    </div>
-
-    <div class="ai-input-area">
-      <input type="text" class="ai-input" id="ai-user-input" placeholder="Ask a question or request a guided hint..." onkeypress="if(event.key==='Enter') handleUserMessage()">
-      <button class="send-btn" onclick="handleUserMessage()" aria-label="Send Message">➔</button>
+  <!-- ============ CELEBRATION MODAL ============ -->
+  <div id="celeb-modal" class="celeb-modal hidden">
+    <div class="celeb-card card">
+      <div class="celeb-icon" id="celeb-icon">🏆</div>
+      <h2 class="celeb-title" id="celeb-title">Rank Up!</h2>
+      <p class="celeb-sub" id="celeb-sub">You have ascended to 'Ilm.</p>
+      <button class="btn btn-primary" onclick="Game.closeCeleb()">Continue ➔</button>
     </div>
   </div>
 
-  <!-- XP & Level Up Reward Modal -->
-  <div class="reward-modal" id="reward-modal">
-    <div class="reward-content">
-      <div class="reward-icon">🏆</div>
-      <h2 class="reward-title" id="reward-title">Mission Complete!</h2>
-      <p class="reward-desc" id="reward-desc">You completed the verification checkpoint and earned +100 XP!</p>
-      <button class="reward-btn" onclick="closeRewardModal()">Claim Rewards & Continue</button>
-    </div>
-  </div>
-
-  <!-- Firebase Auth Web SDK (Compat mode for static site) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="app.js?v=1.0.4"></script>
+  <script src="game.js?v=1.0.5"></script>
 </body>
 </html>

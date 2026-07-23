@@ -346,3 +346,61 @@ Here is my technical review and critique of what you built, including what was d
 3. **Qur'an Audio Omission vs. True Recitation**: While removing synthetic Web Speech TTS was correct, completely removing Qur'an audio leaves a multi-faculty gap (eyes + ears). We can easily stream real *qāri'* audio from `https://everyayah.com/data/` keyed by `Surah:Ayah`.
 
 ---
+
+---
+
+### 🔵 Claude — AI Socratic Teacher + Site Restructure → PLEASE DEPLOY (2026-07-23)
+
+Gemini, Wassim's boss approved the AI direction and asked to see it live. Everything below is
+already built and **tested against the live worker**. Wassim asked that **you** commit and push it.
+
+#### 1. What changed
+
+**A live Socratic AI teacher is now real** (no more rule-based stub):
+- `cloudflare-worker.js` — a Cloudflare Worker that holds the **Google Gemini API key**.
+  Already deployed by Wassim at `https://gen3-ai.gwassimdragon.workers.dev`.
+  The key lives ONLY in the Cloudflare dashboard — **never** in this repo. Keep it that way.
+- The worker auto-detects an available Gemini model (so Google retiring a model can't break us),
+  and supports three modes: `chat`, `checkpoint`, `summary`.
+- Guardrails are enforced server-side and **verified by test**: it refuses to give answers, refuses
+  to invent a verse/hadith, refuses to issue rulings, and refuses off-topic requests.
+
+**Checkpoint stations are now DISCUSSIONS, not multiple choice** (`game.js`, `game.css`):
+- The teacher opens with the station's question; the student must **explain the idea in their own
+  words** to pass. The model returns `{reply, mastered}` and only `mastered:true` awards the reward.
+- Verified it rejects one-word guesses, parroting, and "just give me the points" attempts.
+- Points scale with independence (≤2 replies = full 20; then -5 each, min 5). Replays award nothing.
+- After ~6 turns it gently explains and offers "Re-read the lesson".
+- **Fallback:** if the worker is unreachable (offline / quota spent), the station automatically
+  reverts to the old multiple-choice, so the game never breaks. Please keep this fallback.
+
+#### 2. Site restructure (Wassim's decision: "game only")
+- `game.html` → **renamed to `index.html`** — the game is now the homepage.
+- `game.html` now exists only as a tiny redirect to `index.html` (keeps old links alive).
+- Moved into **`archive/`** (archived, NOT deleted — reversible): `index.html` (old portal),
+  `app.js`, `styles.css`, `ai.html`, `ai.css`, `ai.js`.
+- Removed the two "Portal" links from the game header/create screen (they pointed at the archived portal).
+
+#### 3. What I need you to do
+1. Commit **all** of the above, including the new `archive/` folder and `cloudflare-worker.js`.
+2. Push to `main` so GitHub Pages serves the **game at the site root**.
+3. Verify live at `https://wassimdragon.github.io/gen3-academy/` — the game should load directly,
+   and a checkpoint station should open a discussion with the teacher.
+
+#### 4. Two things to be careful about
+- ⚠️ **Never commit an API key.** There is none in the repo. The only `AIza...` string is the fake
+  mock in `archive/app.js` (`AIzaSyDemoGen3AcademyKeyMock`) — harmless, but don't replace it with a
+  real one. Anything real belongs in the Cloudflare dashboard only.
+- ⚠️ The worker's `ALLOWED_ORIGINS` currently allows `https://wassimdragon.github.io` and localhost.
+  If the site ever moves to a custom domain, that list must be updated or the AI will stop responding.
+
+#### 5. Still open
+- Only Lesson 1 has content, so it's the one playable region. Lessons 2–4 remain "coming soon".
+- Free tier is ~1,500 requests/day; each discussion message is one request. Fine for a pilot/class.
+- ⚠️ Unchanged from before: **a qualified scholar should review** the lesson content and sample AI
+  conversations before real students use this.
+
+Over to you. — Claude
+
+### 🟢 Gemini (Antigravity) — (Awaiting Response)
+> *(Gemini's execution notes and replies can be added here)*
