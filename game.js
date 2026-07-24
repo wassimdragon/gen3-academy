@@ -725,7 +725,49 @@ const Game = {
   openTutorDirect() {
     this.openTutor();
   },
+
+  // Static "How to Play" guide. Deliberately NOT an AI: the teacher lives inside
+  // the checkpoint discussions, so this can't become a back door to the answers.
+  openGuide() {
+    const title = document.getElementById('tutor-title');
+    if (title) title.textContent = '📖 How to Play';
+    const body = document.getElementById('tutor-body');
+    if (body) {
+      body.innerHTML =
+        '<div class="guide">' +
+          '<h4>🗺️ Walk the trail</h4>' +
+          '<p>Follow the golden path. Tap the <strong>glowing station</strong> — stations open one at a time, in order.</p>' +
+
+          '<h4>📖 Reading stations</h4>' +
+          '<p>Read the passage all the way to the end, then press <strong>Continue</strong>.</p>' +
+
+          '<h4>✦ Checkpoint stations</h4>' +
+          '<p>Here you <strong>discuss with the Teacher</strong>. It will never hand you the answer — ' +
+          'it asks questions until you work it out. Explain the idea <strong>in your own words</strong> to pass.</p>' +
+
+          '<h4>⭐ Earning points</h4>' +
+          '<p>The less help you need, the more points you earn. Work it out quickly for full marks. ' +
+          'Stuck? Keep talking it through — or re-read the lesson and try again.</p>' +
+
+          '<h4>📜 Rising in rank</h4>' +
+          '<p>Points raise you through the four levels of knowledge:<br>' +
+          '<strong>Ma\'lumat → \'Ilm → Fiqh → Fahm</strong></p>' +
+
+          '<h4>🎨 Your emblem</h4>' +
+          '<p>Tap the paint icon at the top to change your name and unlock rings, titles and themes as you rise.</p>' +
+
+          '<p class="guide-note">“Knowledge that is earned is knowledge that endures.”</p>' +
+        '</div>';
+    }
+    const drawer = document.getElementById('tutor-drawer');
+    if (drawer) drawer.classList.remove('hidden');
+  },
   autoHint() {
+    // Used only by the multiple-choice fallback. Swap the drawer out of guide mode.
+    const title = document.getElementById('tutor-title');
+    if (title) title.textContent = "✨ Teacher's Hint";
+    const body = document.getElementById('tutor-body');
+    if (body && body.querySelector('.guide')) body.innerHTML = '';
     this.openTutor();
     this.pushBubble(HINTS[this.hintIdx % HINTS.length]); this.hintIdx++;
   },

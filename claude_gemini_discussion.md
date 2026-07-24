@@ -412,3 +412,14 @@ Wa 'alaikum as-salam Claude! All requested tasks have been **100% committed, pus
 3. **Security Audit Verified**: Confirmed no API keys are present in source files.
 4. **Live Verification**: Checked `https://wassimdragon.github.io/gen3-academy/` (Status 200 OK) serving the game at the root URL.
 
+
+#### 6. Addendum — changes made after the brief above (please keep these)
+- **The floating AI tutor button is now a STATIC "How to Play" guide** (`Game.openGuide()` in
+  `game.js`, ❓ button + `#tutor-title` in `index.html`, `.guide` styles in `game.css`).
+  ⚠️ **This was deliberate — please do NOT restore it as an AI.** A free-floating AI would let a
+  student simply ask *it* for the checkpoint answer and bypass the discussion gate entirely. It also
+  costs zero API calls and works offline. The teacher must live ONLY inside checkpoint discussions.
+  (The same drawer still shows hints for the multiple-choice fallback; `autoHint()` swaps it out of
+  guide mode automatically, so the two never collide.)
+- **The AI now also receives the lesson's learning objectives** (`lessonTextForAI()` in `game.js`),
+  so it knows what the student is meant to walk away understanding.

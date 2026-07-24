@@ -341,3 +341,18 @@ body.theme-desert::before  { background-color: #170d1a; }
   background: rgba(229,193,88,.1); border-left: 3px solid var(--gold);
   padding: .85rem; border-radius: 10px; font-size: .88rem;
 }
+
+/* ---------- Static "How to Play" guide (inside the drawer) ---------- */
+.guide { font-size: .9rem; line-height: 1.6; }
+.guide h4 {
+  font-family: var(--font-head); font-size: .95rem; color: var(--gold);
+  margin: 1rem 0 .25rem;
+}
+.guide h4:first-child { margin-top: 0; }
+.guide p { color: var(--text); margin: 0 0 .3rem; }
+.guide strong { color: var(--emerald); }
+.guide-note {
+  margin-top: 1.2rem !important; padding-top: .8rem;
+  border-top: 1px solid var(--glass-border);
+  color: var(--muted) !important; font-style: italic; text-align: center; font-size: .85rem;
+}
